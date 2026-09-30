@@ -10,8 +10,8 @@ const ENABLE_ENCRYPTION =
   process.env.NEXT_PUBLIC_ENABLE_ENCRYPTION?.toLowerCase() === 'true';
 
 
-export const backend_api = 'https://xozoschool.store';
-const API_BASE_HTTP = 'https://xozoschool.store/api/';
+export const backend_api = 'http://127.0.0.1:8000';
+const API_BASE_HTTP = 'http://127.0.0.1:8000/api/';
 
 
 declare module 'axios' {

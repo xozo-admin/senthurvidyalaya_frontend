@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { AlertCircle, Building2, GraduationCap, Plus, RefreshCw, School, UserRoundCheck, Users } from 'lucide-react';
+import { AlertCircle, Building2, GraduationCap, Pencil, Plus, RefreshCw, School, Trash2, UserRoundCheck, Users, X } from 'lucide-react';
 import { adminApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { toastError, toastSuccess, toastWarning } from '@/lib/toast';
@@ -28,6 +28,10 @@ type SchoolRecord = {
   teacher_count?: number;
   staff_count?: number;
   admin_count?: number;
+  total_students?: number;
+  total_staffs?: number;
+  total_teachers?: number;
+  total_non_teaching?: number;
 };
 
 const initialForm = {
@@ -79,6 +83,8 @@ export default function SchoolsPage() {
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [editingSchoolId, setEditingSchoolId] = useState<number | null>(null);
+  const [deletingSchoolId, setDeletingSchoolId] = useState<number | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const isSuperAdmin = user?.user_type === 'super_admin';
@@ -132,6 +138,52 @@ export default function SchoolsPage() {
     return institution.id;
   };
 
+  const resetForm = (institutionId?: string) => {
+    setEditingSchoolId(null);
+    setForm({
+      ...initialForm,
+      institution: institutionId || (institutions[0]?.id ? String(institutions[0].id) : ''),
+    });
+  };
+
+  const handleEdit = (school: SchoolRecord) => {
+    setEditingSchoolId(school.id);
+    setForm({
+      institution: school.institution ? String(school.institution) : '',
+      name: school.name || '',
+      code: school.code || '',
+      address: school.address || '',
+      contact_phone: school.contact_phone || '',
+      contact_email: school.contact_email || '',
+      total_students: Number(school.total_students || 0),
+      total_staffs: Number(school.total_staffs || 0),
+      total_teachers: Number(school.total_teachers || 0),
+      total_non_teaching: Number(school.total_non_teaching || 0),
+      logo: null,
+      is_active: school.is_active,
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async (school: SchoolRecord) => {
+    const confirmed = window.confirm(
+      `Delete "${school.name}" permanently? This can also delete records associated with this school and cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    try {
+      setDeletingSchoolId(school.id);
+      await adminApi.school.schools.delete(school.id);
+      if (editingSchoolId === school.id) resetForm();
+      setSchools((current) => current.filter((item) => item.id !== school.id));
+      toastSuccess('School deleted successfully');
+    } catch (error: any) {
+      toastError(getApiMessage(error, 'Failed to delete school'));
+    } finally {
+      setDeletingSchoolId(null);
+    }
+  };
+
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
@@ -156,12 +208,17 @@ export default function SchoolsPage() {
       payload.append('total_non_teaching', String(form.total_non_teaching));
       payload.append('is_active', String(form.is_active));
       if (form.logo) payload.append('logo', form.logo);
-      await adminApi.school.schools.create(payload);
-      toastSuccess('School created successfully');
-      setForm({ ...initialForm, institution: institutionId });
-      loadData();
+      if (editingSchoolId) {
+        await adminApi.school.schools.update(editingSchoolId, payload);
+        toastSuccess('School updated successfully');
+      } else {
+        await adminApi.school.schools.create(payload);
+        toastSuccess('School created successfully');
+      }
+      resetForm(institutionId);
+      await loadData();
     } catch (error: any) {
-      toastError(getApiMessage(error, 'Failed to create school'));
+      toastError(getApiMessage(error, editingSchoolId ? 'Failed to update school' : 'Failed to create school'));
     } finally {
       setSubmitting(false);
     }
@@ -230,8 +287,8 @@ export default function SchoolsPage() {
         <section className="grid gap-6 lg:grid-cols-[420px_1fr]">
           <form onSubmit={handleSubmit} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-950">
-              <Plus className="h-5 w-5 text-blue-700" />
-              Create School
+              {editingSchoolId ? <Pencil className="h-5 w-5 text-blue-700" /> : <Plus className="h-5 w-5 text-blue-700" />}
+              {editingSchoolId ? 'Edit School' : 'Create School'}
             </h2>
 
             <div className="grid gap-3">
@@ -285,12 +342,35 @@ export default function SchoolsPage() {
                 <span className="text-sm font-medium text-slate-700">Address</span>
                 <textarea value={form.address} onChange={(event) => setForm({ ...form, address: event.target.value })} className="mt-1 min-h-20 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
               </label>
+
+              <label className="flex items-center gap-2 text-sm font-medium text-slate-700">
+                <input
+                  type="checkbox"
+                  checked={form.is_active}
+                  onChange={(event) => setForm({ ...form, is_active: event.target.checked })}
+                  className="h-4 w-4 rounded border-slate-300 text-blue-700"
+                />
+                School is active
+              </label>
             </div>
 
-            <button type="submit" disabled={submitting} className="mt-5 flex w-full items-center justify-center gap-2 rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60">
-              <Plus className="h-4 w-4" />
-              {submitting ? 'Creating...' : 'Create school'}
-            </button>
+            <div className="mt-5 flex gap-2">
+              <button type="submit" disabled={submitting} className="flex flex-1 items-center justify-center gap-2 rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60">
+                {editingSchoolId ? <Pencil className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                {submitting ? (editingSchoolId ? 'Saving...' : 'Creating...') : (editingSchoolId ? 'Save changes' : 'Create school')}
+              </button>
+              {editingSchoolId && (
+                <button
+                  type="button"
+                  onClick={() => resetForm()}
+                  disabled={submitting}
+                  className="inline-flex items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+                >
+                  <X className="h-4 w-4" />
+                  Cancel
+                </button>
+              )}
+            </div>
           </form>
 
           <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -330,10 +410,31 @@ export default function SchoolsPage() {
                           </div>
                         </div>
                       </div>
-                      <span className={`rounded-full px-2 py-1 text-xs font-semibold ${school.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                        {school.is_active ? 'Active' : 'Inactive'}
-                      </span>
+                      <div className="flex items-center gap-1">
+                        <button
+                          type="button"
+                          onClick={() => handleEdit(school)}
+                          className="rounded-md p-2 text-blue-700 transition hover:bg-blue-50"
+                          title={`Edit ${school.name}`}
+                          aria-label={`Edit ${school.name}`}
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(school)}
+                          disabled={deletingSchoolId === school.id}
+                          className="rounded-md p-2 text-red-600 transition hover:bg-red-50 disabled:cursor-wait disabled:opacity-50"
+                          title={`Delete ${school.name}`}
+                          aria-label={`Delete ${school.name}`}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </div>
                     </div>
+                    <span className={`mt-3 inline-flex rounded-full px-2 py-1 text-xs font-semibold ${school.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                      {school.is_active ? 'Active' : 'Inactive'}
+                    </span>
                     {school.address && <p className="mt-3 text-sm text-slate-600">{school.address}</p>}
                     <div className="mt-4 grid grid-cols-4 gap-2 text-center text-xs">
                       <div className="rounded-md bg-slate-50 p-2"><b className="block text-slate-950">{school.student_count || 0}</b>Students</div>

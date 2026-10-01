@@ -157,6 +157,7 @@ export default function ClassesSectionsManager() {
   const [activeTab, setActiveTab] = useState<'classes' | 'sections' | 'bulk'>('classes');
   const [expandedClass, setExpandedClass] = useState<number | null>(null);
   const [selectedStandard, setSelectedStandard] = useState<string>('');
+  const [structureAction, setStructureAction] = useState<string | null>(null);
 
   // Forms
   const [newStandard, setNewStandard] = useState<string>('');
@@ -530,6 +531,107 @@ export default function ClassesSectionsManager() {
     }
   };
 
+  const refreshAcademicStructure = async (standardId?: string) => {
+    await Promise.all([
+      fetchStandards(),
+      fetchSections(standardId),
+      fetchTeachers(),
+    ]);
+  };
+
+  const handleEditClass = async (standard: Standard) => {
+    const newName = window.prompt('Enter the new class name', standard.name)?.trim();
+    if (!newName || newName === standard.name) return;
+
+    const actionKey = `class-edit-${standard.id}`;
+    try {
+      setStructureAction(actionKey);
+      await adminApi.academics.structureEdit({
+        type: 'class',
+        class_name: standard.name,
+        old_name: standard.name,
+        new_name: newName,
+        ...schoolScope.scopeParams,
+      });
+      toastSuccess(`Class ${standard.name} renamed to ${newName}`);
+      await refreshAcademicStructure(selectedStandard || undefined);
+    } catch (error: any) {
+      toastError(getErrorMessage(error, 'Failed to update class'));
+    } finally {
+      setStructureAction(null);
+    }
+  };
+
+  const handleDeleteClass = async (standard: Standard) => {
+    const confirmed = window.confirm(
+      `Delete Class ${standard.name} permanently? Its sections and linked academic records can also be deleted. This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    const actionKey = `class-delete-${standard.id}`;
+    try {
+      setStructureAction(actionKey);
+      await adminApi.academics.structureManage({
+        class: standard.name,
+        ...schoolScope.scopeParams,
+      });
+      setExpandedClass(null);
+      setSelectedStandard('');
+      toastSuccess(`Class ${standard.name} deleted successfully`);
+      await refreshAcademicStructure();
+    } catch (error: any) {
+      toastError(getErrorMessage(error, 'Failed to delete class'));
+    } finally {
+      setStructureAction(null);
+    }
+  };
+
+  const handleEditSection = async (section: Section) => {
+    const newName = window.prompt('Enter the new section name', section.name)?.trim();
+    if (!newName || newName === section.name) return;
+
+    const actionKey = `section-edit-${section.id}`;
+    try {
+      setStructureAction(actionKey);
+      await adminApi.academics.structureEdit({
+        type: 'section',
+        class_name: section.standard_name,
+        old_name: section.name,
+        new_name: newName,
+        ...schoolScope.scopeParams,
+      });
+      toastSuccess(`Section ${section.name} renamed to ${newName}`);
+      await refreshAcademicStructure(selectedStandard || undefined);
+    } catch (error: any) {
+      toastError(getErrorMessage(error, 'Failed to update section'));
+    } finally {
+      setStructureAction(null);
+    }
+  };
+
+  const handleDeleteSection = async (section: Section) => {
+    const confirmed = window.confirm(
+      `Delete Section ${section.name} from Class ${section.standard_name}? Linked section records can also be deleted. This cannot be undone.`
+    );
+    if (!confirmed) return;
+
+    const actionKey = `section-delete-${section.id}`;
+    try {
+      setStructureAction(actionKey);
+      await adminApi.academics.structureManage({
+        class: section.standard_name,
+        section: section.name,
+        ...schoolScope.scopeParams,
+      });
+      toastSuccess(`Section ${section.name} deleted successfully`);
+      await refreshAcademicStructure(selectedStandard || undefined);
+    } catch (error: any) {
+      toastError(getErrorMessage(error, 'Failed to delete section'));
+    } finally {
+      setStructureAction(null);
+    }
+  };
+
   const addSectionMapping = () => {
     setNewSections([...newSections, { class_name: '', sections: [] }]);
   };
@@ -870,18 +972,46 @@ export default function ClassesSectionsManager() {
                                   <h5 className={combine("font-medium", get('text', 'primary'))}>
                                     Sections ({standard.sections?.length || 0})
                                   </h5>
-                                  <button
-                                    onClick={handleAddSectionFromClassTab}
-                                    className={combine(
-                                      "px-3 py-1.5 text-sm font-medium rounded-xl transition-all duration-200 flex items-center gap-1",
-                                      theme === 'dark'
-                                        ? 'bg-blue-900/30 text-blue-300 hover:bg-blue-800/30 hover:text-blue-200'
-                                        : 'bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800'
-                                    )}
-                                  >
-                                    <Plus className="h-3 w-3" />
-                                    Add Section
-                                  </button>
+                                  <div className="flex flex-wrap justify-end gap-2">
+                                    <button
+                                      onClick={() => handleEditClass(standard)}
+                                      disabled={structureAction !== null}
+                                      className={combine(
+                                        "px-3 py-1.5 text-sm font-medium rounded-xl transition-all duration-200 flex items-center gap-1 disabled:cursor-wait disabled:opacity-50",
+                                        theme === 'dark'
+                                          ? 'bg-amber-900/30 text-amber-300 hover:bg-amber-800/30'
+                                          : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
+                                      )}
+                                    >
+                                      <Edit className="h-3 w-3" />
+                                      Edit Class
+                                    </button>
+                                    <button
+                                      onClick={() => handleDeleteClass(standard)}
+                                      disabled={structureAction !== null}
+                                      className={combine(
+                                        "px-3 py-1.5 text-sm font-medium rounded-xl transition-all duration-200 flex items-center gap-1 disabled:cursor-wait disabled:opacity-50",
+                                        theme === 'dark'
+                                          ? 'bg-red-900/30 text-red-300 hover:bg-red-800/30'
+                                          : 'bg-red-100 text-red-700 hover:bg-red-200'
+                                      )}
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                      Delete Class
+                                    </button>
+                                    <button
+                                      onClick={handleAddSectionFromClassTab}
+                                      className={combine(
+                                        "px-3 py-1.5 text-sm font-medium rounded-xl transition-all duration-200 flex items-center gap-1",
+                                        theme === 'dark'
+                                          ? 'bg-blue-900/30 text-blue-300 hover:bg-blue-800/30 hover:text-blue-200'
+                                          : 'bg-blue-100 text-blue-600 hover:bg-blue-200 hover:text-blue-800'
+                                      )}
+                                    >
+                                      <Plus className="h-3 w-3" />
+                                      Add Section
+                                    </button>
+                                  </div>
                                 </div>
 
                                 {standard.sections && standard.sections.length > 0 ? (
@@ -961,8 +1091,38 @@ export default function ClassesSectionsManager() {
                                                   : 'text-purple-600 hover:bg-purple-100 hover:text-purple-800'
                                               )}
                                             >
-                                              {teacher ? '' : 'Assign Teacher'}
+                                              {teacher ? 'Change Teacher' : 'Assign Teacher'}
                                             </button>
+                                            <div className="mt-2 flex w-full gap-2">
+                                              <button
+                                                type="button"
+                                                onClick={() => handleEditSection(section)}
+                                                disabled={structureAction !== null}
+                                                className={combine(
+                                                  "flex flex-1 items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium disabled:cursor-wait disabled:opacity-50",
+                                                  theme === 'dark'
+                                                    ? 'text-amber-300 hover:bg-amber-900/30'
+                                                    : 'text-amber-700 hover:bg-amber-100'
+                                                )}
+                                              >
+                                                <Edit className="h-3.5 w-3.5" />
+                                                Edit
+                                              </button>
+                                              <button
+                                                type="button"
+                                                onClick={() => handleDeleteSection(section)}
+                                                disabled={structureAction !== null}
+                                                className={combine(
+                                                  "flex flex-1 items-center justify-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium disabled:cursor-wait disabled:opacity-50",
+                                                  theme === 'dark'
+                                                    ? 'text-red-300 hover:bg-red-900/30'
+                                                    : 'text-red-700 hover:bg-red-100'
+                                                )}
+                                              >
+                                                <Trash2 className="h-3.5 w-3.5" />
+                                                Delete
+                                              </button>
+                                            </div>
                                           </div>
                                         </div>
                                       );
@@ -1363,6 +1523,32 @@ export default function ClassesSectionsManager() {
                                       ) : (
                                         <Users className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                       )}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleEditSection(section)}
+                                      disabled={structureAction !== null}
+                                      className={combine(
+                                        "p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-all duration-200 disabled:cursor-wait disabled:opacity-50",
+                                        theme === 'dark' ? 'text-amber-300 hover:bg-amber-900/30' : 'text-amber-700 hover:bg-amber-100'
+                                      )}
+                                      title="Edit Section"
+                                      aria-label={`Edit Section ${section.name}`}
+                                    >
+                                      <Edit className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleDeleteSection(section)}
+                                      disabled={structureAction !== null}
+                                      className={combine(
+                                        "p-1.5 sm:p-2 rounded-lg sm:rounded-xl transition-all duration-200 disabled:cursor-wait disabled:opacity-50",
+                                        theme === 'dark' ? 'text-red-300 hover:bg-red-900/30' : 'text-red-700 hover:bg-red-100'
+                                      )}
+                                      title="Delete Section"
+                                      aria-label={`Delete Section ${section.name}`}
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
                                     </button>
                                   </div>
                                 </td>

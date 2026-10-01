@@ -605,7 +605,7 @@ export const adminApi = {
       apiClient.delete('academics/structure/manage/', { params }),
 
     structureEdit: (data: {
-      type: 'section' | 'subject';
+      type: 'class' | 'section' | 'subject';
       class_name: string;
       old_name: string;
       new_name: string;

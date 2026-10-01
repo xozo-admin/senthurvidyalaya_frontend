@@ -12,7 +12,7 @@ import {
 } from 'react-icons/fa';
 import { toast, Toaster } from 'react-hot-toast';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'https://senthurvidyalaya-backend.onrender.com/api';
 
 interface SubjectAnalysisData {
   exam: string;

@@ -75,7 +75,7 @@ export const Admissions = () => {
         return;
       }
 
-      const response = await fetch('http://127.0.0.1:8000/api/academics/standards/', {
+      const response = await fetch('https://senthurvidyalaya-backend.onrender.com/api/academics/standards/', {
         headers: {
           'Authorization': `Token ${token}`,
         }
@@ -102,7 +102,7 @@ export const Admissions = () => {
         return;
       }
 
-      const response = await fetch(`http://127.0.0.1:8000/api/academics/sections/?standard_id=${className}`, {
+      const response = await fetch(`https://senthurvidyalaya-backend.onrender.com/api/academics/sections/?standard_id=${className}`, {
         headers: {
           'Authorization': `Token ${token}`,
         }
@@ -203,7 +203,7 @@ export const Admissions = () => {
       }
 
       // First, create the section if it doesn't exist
-      const sectionResponse = await fetch('http://127.0.0.1:8000/api/academics/setup/sections/', {
+      const sectionResponse = await fetch('https://senthurvidyalaya-backend.onrender.com/api/academics/setup/sections/', {
         method: 'POST',
         headers: {
           'Authorization': `Token ${token}`,
@@ -230,7 +230,7 @@ export const Admissions = () => {
         // Let's check what the actual API expects
       };
 
-      const studentResponse = await fetch('http://127.0.0.1:8000/api/setup/students/', {
+      const studentResponse = await fetch('https://senthurvidyalaya-backend.onrender.com/api/setup/students/', {
         method: 'POST',
         headers: {
           'Authorization': `Token ${token}`,

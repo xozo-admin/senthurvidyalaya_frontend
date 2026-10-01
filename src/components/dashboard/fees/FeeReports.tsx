@@ -56,7 +56,7 @@ export default function FeeReports({ academicYear }: FeeReportsProps) {
   const fetchClasses = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/api/academics/standards/', {
+      const response = await fetch('https://senthurvidyalaya-backend.onrender.com/api/academics/standards/', {
         headers: {
           'Authorization': `Token ${token}`,
         },
@@ -82,7 +82,7 @@ export default function FeeReports({ academicYear }: FeeReportsProps) {
       setLoading(true);
       const token = localStorage.getItem('token');
       const response = await fetch(
-        `http://localhost:8000/api/fees/report/class/?class=${selectedClass}&section=${selectedSection}&fee_type=${selectedFeeType}`,
+        `https://senthurvidyalaya-backend.onrender.com/api/fees/report/class/?class=${selectedClass}&section=${selectedSection}&fee_type=${selectedFeeType}`,
         {
           headers: {
             'Authorization': `Token ${token}`,
@@ -108,7 +108,7 @@ export default function FeeReports({ academicYear }: FeeReportsProps) {
       setLoading(true);
       const token = localStorage.getItem('token');
       const response = await fetch(
-        `http://localhost:8000/api/fees/report/due-school/?academic_year=${academicYear}&fee_type=${selectedFeeType}`,
+        `https://senthurvidyalaya-backend.onrender.com/api/fees/report/due-school/?academic_year=${academicYear}&fee_type=${selectedFeeType}`,
         {
           headers: {
             'Authorization': `Token ${token}`,

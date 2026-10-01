@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000/api';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://senthurvidyalaya-backend.onrender.com/api';
 
 export const authApi = {
   // Login (assuming you have this endpoint in accounts app)

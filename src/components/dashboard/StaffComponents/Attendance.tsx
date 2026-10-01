@@ -206,7 +206,7 @@ export const StaffAttendancePage = () => {
   // Fetch staff list
   const fetchStaffList = async () => {
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/schooladmin/staff/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/schooladmin/staff/', {
         headers: getAuthHeaders(),
       });
       
@@ -234,7 +234,7 @@ export const StaffAttendancePage = () => {
   const fetchAttendanceSummary = async () => {
     setLoadingAttendance(true);
     try {
-      const url = `http://127.0.0.1:8000/api/attendance/admin/staff-summary/?month=${selectedMonth}&year=${selectedYear}`;
+      const url = `https://senthurvidyalaya-backend.onrender.com/api/attendance/admin/staff-summary/?month=${selectedMonth}&year=${selectedYear}`;
       const res = await fetch(url, {
         headers: getAuthHeaders(),
       });
@@ -261,7 +261,7 @@ export const StaffAttendancePage = () => {
   const fetchAttendanceRecords = async () => {
     setLoadingAttendance(true);
     try {
-      let url = `http://127.0.0.1:8000/api/attendance/admin/staff/?date=${selectedDate}`;
+      let url = `https://senthurvidyalaya-backend.onrender.com/api/attendance/admin/staff/?date=${selectedDate}`;
       
       if (selectedStaffId) {
         url += `&staff_id=${selectedStaffId}`;
@@ -302,7 +302,7 @@ export const StaffAttendancePage = () => {
         return;
       }
 
-      let url = 'http://127.0.0.1:8000/api/leaves/admin/action/';
+      let url = 'https://senthurvidyalaya-backend.onrender.com/api/leaves/admin/action/';
       
       if (leaveStatusFilter !== 'all') {
         url += `?status=${leaveStatusFilter}`;
@@ -356,7 +356,7 @@ export const StaffAttendancePage = () => {
         return;
       }
 
-      const res = await fetch('http://127.0.0.1:8000/api/leaves/admin/action/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/leaves/admin/action/', {
         method: 'POST',
         headers: getAuthHeaders(),
         body: JSON.stringify({

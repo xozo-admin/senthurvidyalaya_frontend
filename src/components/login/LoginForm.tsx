@@ -112,7 +112,7 @@ export const LoginForm = ({ onSubmit }: LoginFormProps) => {
 
       try {
         const res = await fetch(
-          'http://127.0.0.1:8000/api/accounts/verify-otp/',
+          'https://senthurvidyalaya-backend.onrender.com/api/accounts/verify-otp/',
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -160,7 +160,7 @@ export const LoginForm = ({ onSubmit }: LoginFormProps) => {
     // Login API call
     try {
       const res = await fetch(
-        'http://127.0.0.1:8000/api/accounts/login/',
+        'https://senthurvidyalaya-backend.onrender.com/api/accounts/login/',
         {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },

@@ -112,7 +112,7 @@ export const StaffManagementPage = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://127.0.0.1:8000/api/setup/staff/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/setup/staff/', {
         headers: { 
           Authorization: `Token ${token}`,
           'Content-Type': 'application/json',
@@ -155,7 +155,7 @@ export const StaffManagementPage = () => {
 
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/setup/staff/${staff.staff_id}/`, {
+      const res = await fetch(`https://senthurvidyalaya-backend.onrender.com/api/setup/staff/${staff.staff_id}/`, {
         method: 'DELETE',
         headers: { 
           Authorization: `Token ${token}`,
@@ -188,7 +188,7 @@ export const StaffManagementPage = () => {
 
     const token = localStorage.getItem('token');
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/auth/reset-staff-password/${staff.staff_id}/`, {
+      const res = await fetch(`https://senthurvidyalaya-backend.onrender.com/api/auth/reset-staff-password/${staff.staff_id}/`, {
         method: 'POST',
         headers: { 
           Authorization: `Token ${token}`,
@@ -261,8 +261,8 @@ export const StaffManagementPage = () => {
     };
 
     const url = mode === 'edit' 
-      ? `http://127.0.0.1:8000/api/setup/staff/${formData.staff_id}/`
-      : 'http://127.0.0.1:8000/api/setup/staff/';
+      ? `https://senthurvidyalaya-backend.onrender.com/api/setup/staff/${formData.staff_id}/`
+      : 'https://senthurvidyalaya-backend.onrender.com/api/setup/staff/';
 
     const method = mode === 'edit' ? 'PUT' : 'POST';
 

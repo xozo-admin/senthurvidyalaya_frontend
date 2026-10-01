@@ -12,7 +12,7 @@ import { GiNotebook, GiSchoolBag } from 'react-icons/gi';
 import { MdEmail, MdPhone, MdPerson, MdFamilyRestroom, MdLocationOn } from 'react-icons/md';
 
 // API Configuration
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'https://senthurvidyalaya-backend.onrender.com';
 
 export default function ClassStudents() {
   const [students, setStudents] = useState<any[]>([]);

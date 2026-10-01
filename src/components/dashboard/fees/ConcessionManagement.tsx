@@ -49,7 +49,7 @@ export default function ConcessionManagement({ academicYear }: ConcessionManagem
   const fetchStudents = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/api/students/list/', {
+      const response = await fetch('https://senthurvidyalaya-backend.onrender.com/api/students/list/', {
         headers: {
           'Authorization': `Token ${token}`,
         },
@@ -74,7 +74,7 @@ export default function ConcessionManagement({ academicYear }: ConcessionManagem
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/api/students/details/?student_id=${searchTerm}`, {
+      const response = await fetch(`https://senthurvidyalaya-backend.onrender.com/api/students/details/?student_id=${searchTerm}`, {
         headers: {
           'Authorization': `Token ${token}`,
         },
@@ -115,7 +115,7 @@ export default function ConcessionManagement({ academicYear }: ConcessionManagem
         }]
       };
 
-      const response = await fetch('http://localhost:8000/api/fees/concession/', {
+      const response = await fetch('https://senthurvidyalaya-backend.onrender.com/api/fees/concession/', {
         method: 'POST',
         headers: {
           'Authorization': `Token ${token}`,

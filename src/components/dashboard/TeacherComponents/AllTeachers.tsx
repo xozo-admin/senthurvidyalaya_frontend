@@ -310,7 +310,7 @@ export const AllTeachersPage = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://127.0.0.1:8000/api/schooladmin/teachers/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/schooladmin/teachers/', {
         headers: { 
           Authorization: `Token ${token}`,
           'Content-Type': 'application/json'
@@ -336,7 +336,7 @@ export const AllTeachersPage = () => {
     setLoadingAllocations(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://127.0.0.1:8000/api/teacher/teachers-by-class/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/teacher/teachers-by-class/', {
         headers: { 
           Authorization: `Token ${token}`,
           'Content-Type': 'application/json'
@@ -358,7 +358,7 @@ export const AllTeachersPage = () => {
   const fetchTeacherSubjects = async (teacherId: string) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://127.0.0.1:8000/api/teacher/subject-allocations/?teacher_id=${teacherId}`, {
+      const res = await fetch(`https://senthurvidyalaya-backend.onrender.com/api/teacher/subject-allocations/?teacher_id=${teacherId}`, {
         headers: { 
           Authorization: `Token ${token}`,
           'Content-Type': 'application/json'
@@ -395,7 +395,7 @@ export const AllTeachersPage = () => {
     };
     
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/teacher/remove-subject/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/teacher/remove-subject/', {
         method: 'DELETE',
         headers: {
           Authorization: `Token ${token}`,
@@ -431,7 +431,7 @@ export const AllTeachersPage = () => {
     const token = localStorage.getItem('token');
 
     try {
-      const response = await fetch(`http://127.0.0.1:8000/api/schooladmin/teachers/${id}/`, {
+      const response = await fetch(`https://senthurvidyalaya-backend.onrender.com/api/schooladmin/teachers/${id}/`, {
         method: 'DELETE',
         headers: { 
           Authorization: `Token ${token}`,
@@ -463,7 +463,7 @@ export const AllTeachersPage = () => {
 
     for (const id of selectedTeachers) {
       try {
-        const response = await fetch(`http://127.0.0.1:8000/api/schooladmin/teachers/${id}/`, {
+        const response = await fetch(`https://senthurvidyalaya-backend.onrender.com/api/schooladmin/teachers/${id}/`, {
           method: 'DELETE',
           headers: { 
             Authorization: `Token ${token}`,
@@ -547,8 +547,8 @@ export const AllTeachersPage = () => {
 
     // FIX: Use the correct endpoint format for update
     const url = mode === 'edit'
-      ? `http://127.0.0.1:8000/api/schooladmin/teachers/${teacherIdForUrl}/`
-      : 'http://127.0.0.1:8000/api/schooladmin/teachers/';
+      ? `https://senthurvidyalaya-backend.onrender.com/api/schooladmin/teachers/${teacherIdForUrl}/`
+      : 'https://senthurvidyalaya-backend.onrender.com/api/schooladmin/teachers/';
 
     const method = mode === 'edit' ? 'PUT' : 'POST';
 
@@ -611,7 +611,7 @@ export const AllTeachersPage = () => {
     const token = localStorage.getItem('token');
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/schooladmin/assign-teacher/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/schooladmin/assign-teacher/', {
         method: 'POST',
         headers: {
           Authorization: `Token ${token}`,
@@ -669,7 +669,7 @@ export const AllTeachersPage = () => {
 
     try {
       const res = await fetch(
-        'http://127.0.0.1:8000/api/teacher/assign-subject/',
+        'https://senthurvidyalaya-backend.onrender.com/api/teacher/assign-subject/',
         {
           method: 'POST',
           headers: {
@@ -724,7 +724,7 @@ export const AllTeachersPage = () => {
     }
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/teacher/assign-subject/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/teacher/assign-subject/', {
         method: 'POST',
         headers: {
           Authorization: `Token ${token}`,

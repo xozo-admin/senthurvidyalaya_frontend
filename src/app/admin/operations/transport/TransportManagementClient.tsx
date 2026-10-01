@@ -3966,7 +3966,7 @@ const confirmDelete = (
                           {new Date(expense.timestamp).toLocaleDateString()}
                         </span>
                         <a
-                          href={`http://127.0.0.1:8000${expense.proof_file}`}
+                          href={`https://senthurvidyalaya-backend.onrender.com${expense.proof_file}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className={combine(

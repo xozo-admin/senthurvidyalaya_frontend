@@ -2,7 +2,7 @@ import axios from 'axios';
 import Cookies from 'js-cookie';
 import { decryptData, inspectEncryptedResponse, isEncryptedResponse } from './encryption';
 
-const DEFAULT_API_BASE = 'http://localhost:8000/api/';
+const DEFAULT_API_BASE = 'https://senthurvidyalaya-backend.onrender.com/api/';
 
 const resolveBaseUrl = (): string => {
   const envBase =

@@ -50,7 +50,7 @@ export default function FeeCollection({ academicYear }: FeeCollectionProps) {
   const fetchPaymentRecords = async (date: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/api/fees/report/daily/?date=${date}`, {
+      const response = await fetch(`https://senthurvidyalaya-backend.onrender.com/api/fees/report/daily/?date=${date}`, {
         headers: {
           'Authorization': `Token ${token}`,
         },
@@ -72,7 +72,7 @@ export default function FeeCollection({ academicYear }: FeeCollectionProps) {
   const fetchClasses = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:8000/api/academics/standards/', {
+      const response = await fetch('https://senthurvidyalaya-backend.onrender.com/api/academics/standards/', {
         headers: {
           'Authorization': `Token ${token}`,
         },
@@ -109,7 +109,7 @@ export default function FeeCollection({ academicYear }: FeeCollectionProps) {
         transaction_id: collectionForm.transaction_id,
       };
 
-      const response = await fetch('http://localhost:8000/api/fees/pay/', {
+      const response = await fetch('https://senthurvidyalaya-backend.onrender.com/api/fees/pay/', {
         method: 'POST',
         headers: {
           'Authorization': `Token ${token}`,
@@ -146,7 +146,7 @@ export default function FeeCollection({ academicYear }: FeeCollectionProps) {
   const handlePrintReceipt = async (transactionId: string) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:8000/api/fees/receipt/?transaction_id=${transactionId}`, {
+      const response = await fetch(`https://senthurvidyalaya-backend.onrender.com/api/fees/receipt/?transaction_id=${transactionId}`, {
         headers: {
           'Authorization': `Token ${token}`,
         },

@@ -1945,7 +1945,7 @@ export default function WorkManagementPage() {
                         {assignment?.proof_url && (
                           <div className="mt-2">
                             <a
-                              href={/^https?:\/\//i.test(assignment.proof_url) ? assignment.proof_url : `http://localhost:8000${assignment.proof_url.startsWith('/') ? '' : '/'}${assignment.proof_url}`}
+                              href={/^https?:\/\//i.test(assignment.proof_url) ? assignment.proof_url : `https://senthurvidyalaya-backend.onrender.com${assignment.proof_url.startsWith('/') ? '' : '/'}${assignment.proof_url}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className={combine(

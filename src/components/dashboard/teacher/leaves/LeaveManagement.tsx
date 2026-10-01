@@ -18,7 +18,7 @@ import { toastError, toastSuccess } from '@/lib/toast';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useThemeClasses } from '@/hooks/useThemeClasses';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_MEDIA_BASE_URL || 'http://localhost:8000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_MEDIA_BASE_URL || 'https://senthurvidyalaya-backend.onrender.com';
 
 type LeaveManagementMode = 'own' | 'student';
 

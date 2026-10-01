@@ -15,7 +15,7 @@ import {
 import { toast, Toaster } from 'react-hot-toast';
 import Modal from 'react-modal';
 
-const API_BASE_URL = 'http://localhost:8000/api';
+const API_BASE_URL = 'https://senthurvidyalaya-backend.onrender.com/api';
 
 // Modal Styles (same as assignments page)
 const customStyles = {

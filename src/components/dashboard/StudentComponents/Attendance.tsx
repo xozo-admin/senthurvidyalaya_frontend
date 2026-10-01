@@ -369,7 +369,7 @@ export const EnhancedAttendanceComponent = () => {
       }
 
       const response = await fetch(
-        'http://127.0.0.1:8000/api/academics/standards/',
+        'https://senthurvidyalaya-backend.onrender.com/api/academics/standards/',
         {
           headers: { 'Authorization': `Token ${token}` }
         }
@@ -406,7 +406,7 @@ export const EnhancedAttendanceComponent = () => {
       const token = localStorage.getItem('token');
 
       const response = await fetch(
-        `http://127.0.0.1:8000/api/academics/sections/?standard_id=${classId}`,
+        `https://senthurvidyalaya-backend.onrender.com/api/academics/sections/?standard_id=${classId}`,
         {
           headers: { 'Authorization': `Token ${token}` }
         }
@@ -452,7 +452,7 @@ export const EnhancedAttendanceComponent = () => {
       }
 
       const response = await fetch(
-        `http://127.0.0.1:8000/api/attendance/class-report/?date=${dateStr}`,
+        `https://senthurvidyalaya-backend.onrender.com/api/attendance/class-report/?date=${dateStr}`,
         {
           headers: { 'Authorization': `Token ${token}` }
         }
@@ -487,7 +487,7 @@ export const EnhancedAttendanceComponent = () => {
   try {
     // Fetch class detail data
     const detailResponse = await fetch(
-      `http://127.0.0.1:8000/api/attendance/class-detail/?class=${selectedClassName}&date=${dateStr}`,
+      `https://senthurvidyalaya-backend.onrender.com/api/attendance/class-detail/?class=${selectedClassName}&date=${dateStr}`,
       {
         headers: {
           'Authorization': `Token ${token}`,
@@ -641,7 +641,7 @@ export const EnhancedAttendanceComponent = () => {
         return;
       }
 
-      const response = await fetch('http://127.0.0.1:8000/api/attendance/update/', {
+      const response = await fetch('https://senthurvidyalaya-backend.onrender.com/api/attendance/update/', {
         method: 'PUT',
         headers: {
           'Authorization': `Token ${token}`,

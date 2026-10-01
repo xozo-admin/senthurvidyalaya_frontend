@@ -203,7 +203,7 @@ export const WorkManagementPage = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      let url = 'http://127.0.0.1:8000/api/staff_work/admin/manage/';
+      let url = 'https://senthurvidyalaya-backend.onrender.com/api/staff_work/admin/manage/';
       
       const params = new URLSearchParams();
       if (selectedDate) params.append('date', selectedDate);
@@ -238,7 +238,7 @@ export const WorkManagementPage = () => {
   const fetchRecurringSchedules = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://127.0.0.1:8000/api/staff_work/admin/recurring-schedule/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/staff_work/admin/recurring-schedule/', {
         headers: { 
           Authorization: `Token ${token}`,
           'Content-Type': 'application/json'
@@ -258,7 +258,7 @@ export const WorkManagementPage = () => {
   const fetchStaffList = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://127.0.0.1:8000/api/schooladmin/staff/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/schooladmin/staff/', {
         headers: { 
           Authorization: `Token ${token}`,
           'Content-Type': 'application/json'
@@ -297,7 +297,7 @@ export const WorkManagementPage = () => {
         tasks: tasks
       };
 
-      const res = await fetch('http://127.0.0.1:8000/api/staff_work/admin/assign-bulk/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/staff_work/admin/assign-bulk/', {
         method: 'POST',
         headers: {
           Authorization: `Token ${token}`,
@@ -360,7 +360,7 @@ export const WorkManagementPage = () => {
         return;
       }
 
-      const res = await fetch('http://127.0.0.1:8000/api/staff_work/admin/recurring-schedule/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/staff_work/admin/recurring-schedule/', {
         method: 'POST',
         headers: {
           Authorization: `Token ${token}`,
@@ -400,7 +400,7 @@ export const WorkManagementPage = () => {
     setAssigning(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://127.0.0.1:8000/api/staff_work/admin/manage/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/staff_work/admin/manage/', {
         method: 'PUT',
         headers: {
           Authorization: `Token ${token}`,
@@ -436,7 +436,7 @@ export const WorkManagementPage = () => {
     setAssigning(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://127.0.0.1:8000/api/staff_work/admin/manage/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/staff_work/admin/manage/', {
         method: 'DELETE',
         headers: {
           Authorization: `Token ${token}`,
@@ -471,7 +471,7 @@ export const WorkManagementPage = () => {
     setAssigning(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://127.0.0.1:8000/api/staff_work/admin/recurring-schedule/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/staff_work/admin/recurring-schedule/', {
         method: 'DELETE',
         headers: {
           Authorization: `Token ${token}`,

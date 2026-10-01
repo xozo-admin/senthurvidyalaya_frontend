@@ -187,11 +187,11 @@ const apiService = {
 
   // Student endpoints
   async fetchStudents(): Promise<ApiResponse<Student[]>> {
-    return this.fetchWithAuth<Student[]>('http://127.0.0.1:8000/api/schooladmin/students/');
+    return this.fetchWithAuth<Student[]>('https://senthurvidyalaya-backend.onrender.com/api/schooladmin/students/');
   },
 
   async fetchPerformanceData(studentId: string, timeFilter: TimeFilter = 'all'): Promise<ApiResponse<PerformanceData>> {
-    let url = `http://127.0.0.1:8000/api/performance/admin/marks/?student_id=${studentId}`;
+    let url = `https://senthurvidyalaya-backend.onrender.com/api/performance/admin/marks/?student_id=${studentId}`;
     if (timeFilter !== 'all') {
       url += `&term=${encodeURIComponent(timeFilter)}`;
     }
@@ -199,12 +199,12 @@ const apiService = {
   },
 
   async fetchBehaviourData(studentId: string): Promise<ApiResponse<PerformanceData>> {
-    const url = `http://127.0.0.1:8000/api/performance/admin/behaviour/?student_id=${studentId}`;
+    const url = `https://senthurvidyalaya-backend.onrender.com/api/performance/admin/behaviour/?student_id=${studentId}`;
     return this.fetchWithAuth<PerformanceData>(url);
   },
 
   async fetchSubjectPerformance(studentId: string, subject: string, timeFilter: TimeFilter = 'all'): Promise<ApiResponse<PerformanceData>> {
-    let url = `http://127.0.0.1:8000/api/performance/admin/marks/?student_id=${studentId}&subject=${encodeURIComponent(subject)}`;
+    let url = `https://senthurvidyalaya-backend.onrender.com/api/performance/admin/marks/?student_id=${studentId}&subject=${encodeURIComponent(subject)}`;
     if (timeFilter !== 'all') {
       url += `&term=${encodeURIComponent(timeFilter)}`;
     }
@@ -212,17 +212,17 @@ const apiService = {
   },
 
   async fetchBehaviourTypeData(studentId: string, subject: string, behaviourType: string): Promise<ApiResponse<PerformanceData>> {
-    const url = `http://127.0.0.1:8000/api/performance/admin/behaviour-type/?student_id=${studentId}&subject=${encodeURIComponent(subject)}&behaviour_type=${behaviourType}`;
+    const url = `https://senthurvidyalaya-backend.onrender.com/api/performance/admin/behaviour-type/?student_id=${studentId}&subject=${encodeURIComponent(subject)}&behaviour_type=${behaviourType}`;
     return this.fetchWithAuth<PerformanceData>(url);
   },
 
   async fetchExamBreakdown(studentId: string, examType: string, term: string): Promise<ApiResponse<ExamBreakdown>> {
-    const url = `http://127.0.0.1:8000/api/performance/admin/exam/breakdown/?student_id=${studentId}&exam_type=${encodeURIComponent(examType)}&term=${encodeURIComponent(term)}`;
+    const url = `https://senthurvidyalaya-backend.onrender.com/api/performance/admin/exam/breakdown/?student_id=${studentId}&exam_type=${encodeURIComponent(examType)}&term=${encodeURIComponent(term)}`;
     return this.fetchWithAuth<ExamBreakdown>(url);
   },
 
   async fetchStudentSubjects(classId: string): Promise<ApiResponse<string[]>> {
-    const url = `http://127.0.0.1:8000/api/subjects/?class=${classId}`;
+    const url = `https://senthurvidyalaya-backend.onrender.com/api/subjects/?class=${classId}`;
     const response = await this.fetchWithAuth<any>(url);
     
     if (response.data?.subjects) {
@@ -234,12 +234,12 @@ const apiService = {
   },
 
   async fetchAttendanceData(studentId: string, year: number): Promise<ApiResponse<any>> {
-    const url = `http://127.0.0.1:8000/api/attendance/history/?student_id=${studentId}&year=${year}`;
+    const url = `https://senthurvidyalaya-backend.onrender.com/api/attendance/history/?student_id=${studentId}&year=${year}`;
     return this.fetchWithAuth(url);
   },
 
   async fetchAvailableExams(): Promise<ApiResponse<{name: string, term: string}[]>> {
-    const response = await this.fetchWithAuth<any[]>('http://127.0.0.1:8000/api/exams/list/');
+    const response = await this.fetchWithAuth<any[]>('https://senthurvidyalaya-backend.onrender.com/api/exams/list/');
     
     if (response.data) {
       const examTypes = response.data.map((exam: any) => ({

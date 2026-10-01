@@ -10,8 +10,17 @@ const ENABLE_ENCRYPTION =
   process.env.NEXT_PUBLIC_ENABLE_ENCRYPTION?.toLowerCase() === 'true';
 
 
-export const backend_api = 'http://127.0.0.1:8000';
-const API_BASE_HTTP = 'http://127.0.0.1:8000/api/';
+const DEFAULT_BACKEND_API = 'https://senthurvidyalaya-backend.onrender.com';
+const configuredBackendApi =
+  process.env.NEXT_PUBLIC_BACKEND_API?.trim() ||
+  process.env.NEXT_PUBLIC_API_URL?.trim() ||
+  process.env.NEXT_PUBLIC_API_BASE_URL?.trim() ||
+  DEFAULT_BACKEND_API;
+
+export const backend_api = configuredBackendApi
+  .replace(/\/api\/?$/, '')
+  .replace(/\/+$/, '');
+const API_BASE_HTTP = `${backend_api}/api/`;
 
 
 declare module 'axios' {

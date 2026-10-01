@@ -492,7 +492,7 @@ export default function LeaveManagementPage() {
       return;
     }
     
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+    const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'https://senthurvidyalaya-backend.onrender.com';
     const fileUrl = proofFile.startsWith('http') ? proofFile : `${baseUrl}${proofFile}`;
     setProofUrl(fileUrl);
     setShowProofModal(true);

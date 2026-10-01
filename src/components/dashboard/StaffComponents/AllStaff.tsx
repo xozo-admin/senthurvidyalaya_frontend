@@ -194,7 +194,7 @@ export const AllStaffPage = () => {
         return;
       }
 
-      const res = await fetch('http://127.0.0.1:8000/api/schooladmin/staff/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/schooladmin/staff/', {
         headers: { 
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
@@ -229,7 +229,7 @@ export const AllStaffPage = () => {
   const fetchStaffDetails = async (staffId: string) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://127.0.0.1:8000/api/schooladmin/staff/${staffId}/`, {
+      const res = await fetch(`https://senthurvidyalaya-backend.onrender.com/api/schooladmin/staff/${staffId}/`, {
         headers: { 
           'Authorization': `Token ${token}`,
           'Content-Type': 'application/json'
@@ -283,7 +283,7 @@ export const AllStaffPage = () => {
     };
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/staff/create/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/staff/create/', {
         method: 'POST',
         headers: {
           'Authorization': `Token ${token}`,
@@ -356,7 +356,7 @@ export const AllStaffPage = () => {
     };
 
     try {
-      const res = await fetch(`http://127.0.0.1:8000/api/schooladmin/staff/${selectedStaff.staff_id}/`, {
+      const res = await fetch(`https://senthurvidyalaya-backend.onrender.com/api/schooladmin/staff/${selectedStaff.staff_id}/`, {
         method: 'PUT',
         headers: {
           'Authorization': `Token ${token}`,
@@ -399,7 +399,7 @@ export const AllStaffPage = () => {
 
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://127.0.0.1:8000/api/schooladmin/staff/${staffToDelete.staff_id}/`, {
+      const res = await fetch(`https://senthurvidyalaya-backend.onrender.com/api/schooladmin/staff/${staffToDelete.staff_id}/`, {
         method: 'DELETE',
         headers: { 
           'Authorization': `Token ${token}`,

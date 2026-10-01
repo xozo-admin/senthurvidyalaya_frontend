@@ -70,7 +70,7 @@ export const TeachersPerformancePage = () => {
     try {
       const token = localStorage.getItem('token');
       // API call to fetch classes
-      const response = await fetch(`http://localhost:8000/api/academics/standards/`, {
+      const response = await fetch(`https://senthurvidyalaya-backend.onrender.com/api/academics/standards/`, {
         headers: {
           'Authorization': `Token ${token}`,
         },
@@ -107,7 +107,7 @@ export const TeachersPerformancePage = () => {
       // API call to fetch students in class
       const token = localStorage.getItem('token');
       const response = await fetch(
-        `http://localhost:8000/api/students/list/?class=${selectedClass}&section=${selectedSection}`,
+        `https://senthurvidyalaya-backend.onrender.com/api/students/list/?class=${selectedClass}&section=${selectedSection}`,
         {
           headers: {
             'Authorization': `Token ${token}`,
@@ -131,7 +131,7 @@ export const TeachersPerformancePage = () => {
       // API call to get class performance
       const token = localStorage.getItem('token');
       const response = await fetch(
-        `http://localhost:8000/api/exams/class-result/?class=${selectedClass}&section=${selectedSection}&exam_type=${selectedExam}`,
+        `https://senthurvidyalaya-backend.onrender.com/api/exams/class-result/?class=${selectedClass}&section=${selectedSection}&exam_type=${selectedExam}`,
         {
           headers: {
             'Authorization': `Token ${token}`,
@@ -186,7 +186,7 @@ export const TeachersPerformancePage = () => {
     try {
       const token = localStorage.getItem('token');
       const response = await fetch(
-        `http://localhost:8000/api/exams/subject-analysis/?class=${selectedClass}&section=${selectedSection}&subject=${selectedSubject}&exam_type=${selectedExam}`,
+        `https://senthurvidyalaya-backend.onrender.com/api/exams/subject-analysis/?class=${selectedClass}&section=${selectedSection}&subject=${selectedSubject}&exam_type=${selectedExam}`,
         {
           headers: {
             'Authorization': `Token ${token}`,
@@ -221,7 +221,7 @@ export const TeachersPerformancePage = () => {
         const prevExam = examTypes[currentIndex - 1];
         const token = localStorage.getItem('token');
         const response = await fetch(
-          `http://localhost:8000/api/exams/class-result/?class=${selectedClass}&section=${selectedSection}&exam_type=${prevExam}`,
+          `https://senthurvidyalaya-backend.onrender.com/api/exams/class-result/?class=${selectedClass}&section=${selectedSection}&exam_type=${prevExam}`,
           {
             headers: {
               'Authorization': `Token ${token}`,
@@ -232,7 +232,7 @@ export const TeachersPerformancePage = () => {
         if (response.ok) {
           const prevData = await response.json();
           const currentData = await fetch(
-            `http://localhost:8000/api/exams/class-result/?class=${selectedClass}&section=${selectedSection}&exam_type=${selectedExam}`,
+            `https://senthurvidyalaya-backend.onrender.com/api/exams/class-result/?class=${selectedClass}&section=${selectedSection}&exam_type=${selectedExam}`,
             {
               headers: {
                 'Authorization': `Token ${token}`,

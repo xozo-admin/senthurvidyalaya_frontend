@@ -95,7 +95,7 @@ export const ScheduleManagementPage = () => {
   const fetchStandards = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://127.0.0.1:8000/api/academics/standards/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/academics/standards/', {
         headers: { Authorization: `Token ${token}` },
       });
       
@@ -112,7 +112,7 @@ export const ScheduleManagementPage = () => {
   const fetchSections = async (className: string) => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch(`http://127.0.0.1:8000/api/academics/sections/?standard_id=${className}`, {
+      const res = await fetch(`https://senthurvidyalaya-backend.onrender.com/api/academics/sections/?standard_id=${className}`, {
         headers: { Authorization: `Token ${token}` },
       });
       
@@ -129,7 +129,7 @@ export const ScheduleManagementPage = () => {
   const fetchTeachers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://127.0.0.1:8000/api/setup/teachers/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/setup/teachers/', {
         headers: { Authorization: `Token ${token}` },
       });
       
@@ -150,7 +150,7 @@ export const ScheduleManagementPage = () => {
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(
-        `http://127.0.0.1:8000/api/timetable/manage/?class=${selectedClass}&section=${selectedSection}`,
+        `https://senthurvidyalaya-backend.onrender.com/api/timetable/manage/?class=${selectedClass}&section=${selectedSection}`,
         {
           headers: { Authorization: `Token ${token}` },
         }
@@ -206,7 +206,7 @@ export const ScheduleManagementPage = () => {
       const token = localStorage.getItem('token');
       // Using teacher timetable view with date param to get substitutions
       const res = await fetch(
-        `http://127.0.0.1:8000/api/timetable/teacher/my-class-timetable/?date=${selectedDate}`,
+        `https://senthurvidyalaya-backend.onrender.com/api/timetable/teacher/my-class-timetable/?date=${selectedDate}`,
         {
           headers: { Authorization: `Token ${token}` },
         }
@@ -228,7 +228,7 @@ export const ScheduleManagementPage = () => {
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(
-        `http://127.0.0.1:8000/api/timetable/substitution/free-teachers/?date=${selectedDate}&period=${substitutionForm.period_no}`,
+        `https://senthurvidyalaya-backend.onrender.com/api/timetable/substitution/free-teachers/?date=${selectedDate}&period=${substitutionForm.period_no}`,
         {
           headers: { Authorization: `Token ${token}` },
         }
@@ -251,7 +251,7 @@ export const ScheduleManagementPage = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://127.0.0.1:8000/api/timetable/create/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/timetable/create/', {
         method: 'POST',
         headers: {
           Authorization: `Token ${token}`,
@@ -288,7 +288,7 @@ export const ScheduleManagementPage = () => {
     try {
       const token = localStorage.getItem('token');
       const res = await fetch(
-        `http://127.0.0.1:8000/api/timetable/substitution/assign/?date=${selectedDate}`,
+        `https://senthurvidyalaya-backend.onrender.com/api/timetable/substitution/assign/?date=${selectedDate}`,
         {
           method: 'POST',
           headers: {

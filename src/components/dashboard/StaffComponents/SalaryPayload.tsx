@@ -138,7 +138,7 @@ export const SalaryPayrollPage = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://127.0.0.1:8000/api/schooladmin/staff/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/schooladmin/staff/', {
         headers: { 
           Authorization: `Token ${token}`,
           'Content-Type': 'application/json'
@@ -174,7 +174,7 @@ export const SalaryPayrollPage = () => {
     setSaving(true);
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://127.0.0.1:8000/api/salary/admin/structure/', {
+      const res = await fetch('https://senthurvidyalaya-backend.onrender.com/api/salary/admin/structure/', {
         method: 'POST',
         headers: {
           Authorization: `Token ${token}`,

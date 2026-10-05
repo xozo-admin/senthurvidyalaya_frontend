@@ -100,6 +100,13 @@ interface Stop {
   longitude?: number | null;
 }
 
+interface LocationSearchResult {
+  place_id: number;
+  display_name: string;
+  lat: string;
+  lon: string;
+}
+
 interface Passenger {
   type: 'Student' | 'Teacher' | 'Staff';
   name: string;
@@ -347,6 +354,10 @@ export default function TransportManagementPage() {
     selected: null,
     mapKey: 0,
   });
+  const [locationSearchQuery, setLocationSearchQuery] = useState('');
+  const [locationSearchResults, setLocationSearchResults] = useState<LocationSearchResult[]>([]);
+  const [isSearchingLocation, setIsSearchingLocation] = useState(false);
+  const [locationSearchError, setLocationSearchError] = useState('');
   
   const [attendanceForm, setAttendanceForm] = useState({
     date: new Date().toISOString().split('T')[0],
@@ -1444,6 +1455,9 @@ const confirmDelete = (
       selected: hasValidCoords ? [lat as number, lng as number] : null,
       mapKey: prev.mapKey + 1,
     }));
+    setLocationSearchQuery('');
+    setLocationSearchResults([]);
+    setLocationSearchError('');
   };
 
   const openEditStopLocationPicker = () => {
@@ -1464,6 +1478,75 @@ const confirmDelete = (
       selected: hasValidCoords ? [lat as number, lng as number] : null,
       mapKey: prev.mapKey + 1,
     }));
+    setLocationSearchQuery('');
+    setLocationSearchResults([]);
+    setLocationSearchError('');
+  };
+
+  const searchStopLocation = async () => {
+    const query = locationSearchQuery.trim();
+    if (!query) {
+      setLocationSearchError('Enter a place or address to search.');
+      setLocationSearchResults([]);
+      return;
+    }
+
+    setIsSearchingLocation(true);
+    setLocationSearchError('');
+    setLocationSearchResults([]);
+    try {
+      const params = new URLSearchParams({
+        q: query,
+        format: 'jsonv2',
+        limit: '5',
+      });
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
+        headers: { 'Accept-Language': navigator.language || 'en' },
+      });
+      if (!response.ok) throw new Error('Location search is unavailable. Please try again.');
+
+      const results = (await response.json()) as LocationSearchResult[];
+      if (!results.length) {
+        setLocationSearchError('No matching places found. Try a nearby landmark or address.');
+        return;
+      }
+      setLocationSearchResults(results);
+    } catch (error) {
+      setLocationSearchError(error instanceof Error ? error.message : 'Could not search for that location.');
+    } finally {
+      setIsSearchingLocation(false);
+    }
+  };
+
+  const selectStopSearchResult = (result: LocationSearchResult) => {
+    const lat = Number(result.lat);
+    const lng = Number(result.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+
+    const position: [number, number] = [lat, lng];
+    const map = locationPickerLeafletRef.current;
+    map?.setView(position, 16, { animate: true });
+    locationPickerMarkerRef.current?.remove();
+    locationPickerMarkerRef.current = L.circleMarker(position, {
+      radius: 8,
+      color: '#2563eb',
+      fillColor: '#2563eb',
+      fillOpacity: 0.7,
+    });
+    if (map) locationPickerMarkerRef.current.addTo(map);
+
+    if (locationPickerState.target === 'edit_stop') {
+      setStopForm((prev) => ({ ...prev, latitude: String(lat), longitude: String(lng) }));
+    } else if (locationPickerState.stopIndex !== null) {
+      const { trip, stopIndex } = locationPickerState;
+      setRouteForm((prev) => {
+        const stops = [...prev.trips[trip]];
+        if (!stops[stopIndex]) return prev;
+        stops[stopIndex] = { ...stops[stopIndex], latitude: String(lat), longitude: String(lng) };
+        return { ...prev, trips: { ...prev.trips, [trip]: stops } };
+      });
+    }
+    setLocationSearchResults([]);
   };
 
   const closeStopLocationPicker = () => {
@@ -4014,6 +4097,59 @@ const confirmDelete = (
                 <p className={combine("text-sm mb-3", get('text', 'secondary'))}>
                   Click on the map to set latitude and longitude for this stop.
                 </p>
+                <div className="mb-3">
+                  <div className="flex gap-2">
+                    <input
+                      type="search"
+                      value={locationSearchQuery}
+                      onChange={(event) => setLocationSearchQuery(event.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === 'Enter') {
+                          event.preventDefault();
+                          void searchStopLocation();
+                        }
+                      }}
+                      placeholder="Search for a place or address"
+                      aria-label="Search for a stop location"
+                      className={combine(getInputClass(), "min-w-0 flex-1")}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => void searchStopLocation()}
+                      disabled={isSearchingLocation}
+                      className={combine(getPrimaryButtonClass(), "shrink-0")}
+                    >
+                      {isSearchingLocation ? 'Searching…' : 'Search'}
+                    </button>
+                  </div>
+                  <p className={combine("mt-1 text-xs", get('text', 'tertiary'))}>
+                    Search powered by OpenStreetMap.
+                  </p>
+                  {locationSearchError && (
+                    <p role="status" className="mt-2 text-sm text-red-500">
+                      {locationSearchError}
+                    </p>
+                  )}
+                  {locationSearchResults.length > 0 && (
+                    <ul className={combine("mt-2 max-h-40 overflow-y-auto rounded-lg border", get('border', 'primary'))}>
+                      {locationSearchResults.map((result) => (
+                        <li key={result.place_id}>
+                          <button
+                            type="button"
+                            onClick={() => selectStopSearchResult(result)}
+                            className={combine(
+                              "w-full px-3 py-2 text-left text-sm transition-colors",
+                              get('text', 'primary'),
+                              theme === 'dark' ? 'hover:bg-white/10' : 'hover:bg-slate-100',
+                            )}
+                          >
+                            {result.display_name}
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
                 <div className="h-[420px] rounded-lg overflow-hidden">
                   <div
                     key={`stop-map-${locationPickerState.mapKey}`}

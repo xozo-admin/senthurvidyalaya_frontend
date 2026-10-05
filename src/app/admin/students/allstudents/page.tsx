@@ -1392,14 +1392,13 @@ export default function AllStudentsPage() {
                   </button>
 
                   <button
-                    onClick={() => {
-                      setFormErrors({});
-                      setMode("add");
-                      setFormData(emptyStudentForm);
-                    }}
+                    type="button"
+                    disabled
+                    aria-disabled="true"
+                    title="Adding students is temporarily disabled"
                     className={combine(
                       getPrimaryButtonClass(),
-                      "flex items-center space-x-2 shrink-0",
+                      "flex items-center space-x-2 shrink-0 opacity-50 cursor-not-allowed",
                     )}
                   >
                     <FaUserPlus className="text-xs" />

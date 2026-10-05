@@ -932,15 +932,35 @@ export default function AllTeachersPage() {
 
     setUploadProgress(0);
     try {
-      await adminApi.csv.uploadStudents(csvFile, schoolScope.scopeParams);
-      toastSuccess("Bulk upload completed successfully!");
+      const response = await adminApi.csv.uploadStudents(
+        csvFile,
+        schoolScope.scopeParams,
+      );
+      const result = response?.data || {};
+      const errors: string[] = Array.isArray(result.errors) ? result.errors : [];
+      if (errors.length > 0) {
+        console.warn("Teacher CSV upload row errors:", errors);
+        toastWarning(
+          `${result.summary?.teachers || 0} teachers uploaded; ${errors.length} row(s) failed. ${errors[0]}`,
+        );
+      } else {
+        toastSuccess(
+          `Bulk upload completed successfully (${result.summary?.teachers || 0} teachers).`,
+        );
+      }
       fetchTeachers(currentPage);
       fetchTeacherStats();
       setBulkUploadMode(false);
       setCsvFile(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Upload error:", error);
-      toastError("Upload failed. Please try again.");
+      const responseData = error?.response?.data || {};
+      const firstRowError = Array.isArray(responseData.errors)
+        ? responseData.errors[0]
+        : null;
+      toastError(
+        firstRowError || responseData.error || responseData.message || "Upload failed. Please try again.",
+      );
     } finally {
       setUploadProgress(100);
     }

@@ -115,6 +115,9 @@ apiClient.interceptors.request.use(async (config) => {
   }
 
   if (config.data instanceof FormData) {
+    // Let the browser set multipart/form-data with its boundary. A stale
+    // application/json header makes Django treat file uploads as empty data.
+    config.headers.delete('Content-Type');
     return config;
   }
 

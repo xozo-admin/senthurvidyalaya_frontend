@@ -805,7 +805,9 @@ export const MainContent = () => {
     : overview.school_name;
   const identityLogo = (
     isInstitutionDashboard
-      ? overview.institution_logo || stats.meta.institution_logo
+      ? selectedSchoolId !== 'all' && selectedSchoolId !== '__refresh__'
+        ? selectedSchoolOption?.logo || overview.school_logo || stats.meta.school_logo
+        : overview.institution_logo || stats.meta.institution_logo
       : overview.school_logo || stats.meta.school_logo
   ) || '/school_logo.jpeg';
   const selectedSchoolName = selectedSchoolId === 'all'

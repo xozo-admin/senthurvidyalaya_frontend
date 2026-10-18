@@ -180,6 +180,7 @@ interface DashboardSchoolOption {
   code?: string | null;
   logo?: string | null;
   institution_name?: string | null;
+  is_active?: boolean;
   student_count?: number;
   teacher_count?: number;
   staff_count?: number;
@@ -803,11 +804,13 @@ export const MainContent = () => {
   const dashboardSubtitle = isInstitutionDashboard
     ? selectedSchoolId === 'all' ? 'All Schools' : selectedSchoolOption?.name || overview.school_name
     : overview.school_name;
+  const availableSchoolLogo = schoolOptions.find((school) => school.is_active && school.logo)?.logo
+    || schoolOptions.find((school) => school.logo)?.logo;
   const identityLogo = (
     isInstitutionDashboard
       ? selectedSchoolId !== 'all' && selectedSchoolId !== '__refresh__'
         ? selectedSchoolOption?.logo || overview.school_logo || stats.meta.school_logo
-        : overview.institution_logo || stats.meta.institution_logo
+        : overview.institution_logo || stats.meta.institution_logo || availableSchoolLogo
       : overview.school_logo || stats.meta.school_logo
   ) || '/school_logo.jpeg';
   const selectedSchoolName = selectedSchoolId === 'all'

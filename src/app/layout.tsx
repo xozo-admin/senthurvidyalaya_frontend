@@ -4,6 +4,7 @@ import ToastProvider from '../components/providers/ToastProvider';
 import { AuthProvider } from '@/contexts/AuthContext';
 import './globals.css';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import IndiaPhonePrefix from '@/components/providers/IndiaPhonePrefix';
 
 export const metadata: Metadata = {
   title: 'School Management System',
@@ -25,6 +26,7 @@ export default function RootLayout({
       <body className="font-sans antialiased">
         <ThemeProvider>
         <AuthProvider>
+          <IndiaPhonePrefix />
           {children}
           <ToastProvider />
         </AuthProvider>

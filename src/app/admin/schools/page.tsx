@@ -396,14 +396,19 @@ export default function SchoolsPage() {
                     <div className="flex items-start justify-between gap-3">
                       <div>
                         <div className="flex items-center gap-3">
-                          <img
-                            src={school.logo || '/school_logo.jpeg'}
-                            alt={`${school.name} logo`}
-                            className="h-11 w-11 rounded-lg border border-slate-200 bg-white object-contain p-1"
-                            onError={(event) => {
-                              event.currentTarget.src = '/school_logo.jpeg';
-                            }}
-                          />
+                          <div className="relative flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-slate-200 bg-white">
+                            <Building2 className="h-6 w-6 text-blue-700" />
+                            {school.logo && (
+                              <img
+                                src={school.logo}
+                                alt={`${school.name} logo`}
+                                className="absolute inset-0 h-full w-full bg-white object-contain p-1"
+                                onError={(event) => {
+                                  event.currentTarget.style.display = 'none';
+                                }}
+                              />
+                            )}
+                          </div>
                           <div>
                             <h3 className="font-semibold text-slate-950">{school.name}</h3>
                             <p className="text-sm text-slate-500">{school.institution_name || 'No institution'}</p>

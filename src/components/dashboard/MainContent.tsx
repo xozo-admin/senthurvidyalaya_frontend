@@ -812,7 +812,7 @@ export const MainContent = () => {
         ? selectedSchoolOption?.logo || overview.school_logo || stats.meta.school_logo
         : overview.institution_logo || stats.meta.institution_logo || availableSchoolLogo
       : overview.school_logo || stats.meta.school_logo
-  ) || '/school_logo.jpeg';
+  );
   const selectedSchoolName = selectedSchoolId === 'all'
     ? 'All Schools'
     : selectedSchoolOption?.name || overview.school_name;
@@ -853,14 +853,17 @@ export const MainContent = () => {
               <div className="relative shrink-0">
                 <div className="absolute inset-0 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur-xl opacity-20"></div>
                 <div className="relative flex h-14 w-14 items-center justify-center overflow-hidden rounded-xl border border-white/70 bg-white shadow-lg shadow-blue-600/15 sm:h-16 sm:w-16 lg:h-[72px] lg:w-[72px]">
-                  <img
-                    src={identityLogo}
-                    alt={`${dashboardSubtitle} logo`}
-                    className="h-full w-full object-contain p-1"
-                    onError={(event) => {
-                      event.currentTarget.src = '/school_logo.jpeg';
-                    }}
-                  />
+                  <Building2 className="h-8 w-8 text-blue-700" />
+                  {identityLogo && (
+                    <img
+                      src={identityLogo}
+                      alt={`${dashboardSubtitle} logo`}
+                      className="absolute inset-0 h-full w-full bg-white object-contain p-1"
+                      onError={(event) => {
+                        event.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  )}
                 </div>
               </div>
               <div className="min-w-0">

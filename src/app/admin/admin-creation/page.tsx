@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { AlertCircle, Building2, RefreshCw, ShieldCheck, UserPlus } from 'lucide-react';
+import { AlertCircle, Building2, Pencil, RefreshCw, ShieldCheck, Trash2, UserPlus, X } from 'lucide-react';
 import { adminApi } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { toastError, toastSuccess, toastWarning } from '@/lib/toast';
@@ -64,6 +64,8 @@ export default function AdminCreationPage() {
   const [form, setForm] = useState(initialForm);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [editingAdminId, setEditingAdminId] = useState<number | null>(null);
+  const [deletingAdminId, setDeletingAdminId] = useState<number | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const isSuperAdmin = user?.user_type === 'super_admin';
@@ -104,32 +106,72 @@ export default function AdminCreationPage() {
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!form.admin_name.trim() || !form.admin_email.trim() || !form.admin_password.trim() || !form.school_id) {
-      toastWarning('Name, email, password, and school are required');
+    if (!form.admin_name.trim() || !form.admin_email.trim() || (!editingAdminId && (!form.admin_password.trim() || !form.school_id))) {
+      toastWarning(editingAdminId ? 'Name and email are required' : 'Name, email, password, and school are required');
       return;
     }
 
-    if (form.admin_password.length < 6) {
+    if (form.admin_password && form.admin_password.length < 6) {
       toastWarning('Password must be at least 6 characters');
       return;
     }
 
     try {
       setSubmitting(true);
-      await adminApi.adminUsers.create({
-        ...form,
+      const payload = {
         admin_name: form.admin_name.trim(),
         admin_phone: form.admin_phone.trim(),
         admin_email: form.admin_email.trim(),
-        school_id: Number(form.school_id),
-      });
-      toastSuccess('Admin created successfully');
+        ...(form.admin_password ? { admin_password: form.admin_password } : {}),
+        school_id: form.school_id ? Number(form.school_id) : null,
+        is_active: form.is_active,
+      };
+      if (editingAdminId) {
+        await adminApi.adminUsers.update(editingAdminId, payload);
+        toastSuccess('Admin updated successfully');
+      } else {
+        await adminApi.adminUsers.create({ ...payload, admin_password: form.admin_password, school_id: Number(form.school_id) });
+        toastSuccess('Admin created successfully');
+      }
       setForm(initialForm);
-      loadAdmins();
+      setEditingAdminId(null);
+      await loadAdmins();
     } catch (error: any) {
-      toastError(getApiMessage(error, 'Failed to create admin'));
+      toastError(getApiMessage(error, editingAdminId ? 'Failed to update admin' : 'Failed to create admin'));
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleEdit = (admin: AdminUser) => {
+    setEditingAdminId(admin.id);
+    setForm({
+      admin_name: admin.full_name || admin.username,
+      admin_phone: admin.phone || '',
+      admin_email: admin.email || admin.username,
+      admin_password: '',
+      school_id: admin.school_id ? String(admin.school_id) : '',
+      is_active: admin.is_active,
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDelete = async (admin: AdminUser) => {
+    const confirmed = window.confirm(`Delete admin account "${admin.full_name || admin.username}" permanently? This cannot be undone.`);
+    if (!confirmed) return;
+    try {
+      setDeletingAdminId(admin.id);
+      await adminApi.adminUsers.delete(admin.id);
+      if (editingAdminId === admin.id) {
+        setEditingAdminId(null);
+        setForm(initialForm);
+      }
+      await loadAdmins();
+      toastSuccess('Admin deleted successfully');
+    } catch (error: any) {
+      toastError(getApiMessage(error, 'Failed to delete admin'));
+    } finally {
+      setDeletingAdminId(null);
     }
   };
 
@@ -138,7 +180,7 @@ export default function AdminCreationPage() {
       <div className="min-h-full bg-slate-50 p-6">
         <div className="mx-auto max-w-3xl rounded-lg border border-slate-200 bg-white p-6">
           <h1 className="text-xl font-semibold text-slate-950">School Admins</h1>
-          <p className="mt-2 text-sm text-slate-600">Only super admin accounts can create school admins.</p>
+          <p className="mt-2 text-sm text-slate-600">Only super admin accounts can manage school admins.</p>
         </div>
       </div>
     );
@@ -192,8 +234,8 @@ export default function AdminCreationPage() {
         <section className="grid gap-6 lg:grid-cols-[420px_1fr]">
           <form onSubmit={handleSubmit} className="rounded-lg border border-slate-200 bg-white p-5 shadow-sm">
             <h2 className="mb-4 flex items-center gap-2 text-lg font-semibold text-slate-950">
-              <UserPlus className="h-5 w-5 text-blue-700" />
-              Create School Admin
+              {editingAdminId ? <Pencil className="h-5 w-5 text-blue-700" /> : <UserPlus className="h-5 w-5 text-blue-700" />}
+              {editingAdminId ? 'Edit School Admin' : 'Create School Admin'}
             </h2>
 
             <div className="space-y-3">
@@ -204,7 +246,7 @@ export default function AdminCreationPage() {
                   onChange={(event) => setForm({ ...form, school_id: event.target.value })}
                   className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
                 >
-                  <option value="">Choose school</option>
+                  <option value="">{editingAdminId ? 'No school assigned' : 'Choose school'}</option>
                   {schools.map((school) => (
                     <option key={school.id} value={school.id}>
                       {school.name}{school.code ? ` (${school.code})` : ''}
@@ -245,12 +287,12 @@ export default function AdminCreationPage() {
               </label>
 
               <label className="block">
-                <span className="text-sm font-medium text-slate-700">Password</span>
+                <span className="text-sm font-medium text-slate-700">Password{editingAdminId ? ' (leave blank to keep current)' : ''}</span>
                 <input
                   value={form.admin_password}
                   onChange={(event) => setForm({ ...form, admin_password: event.target.value })}
                   className="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm"
-                  placeholder="Minimum 6 characters"
+                  placeholder={editingAdminId ? 'Optional, minimum 6 characters' : 'Minimum 6 characters'}
                   type="password"
                 />
               </label>
@@ -271,8 +313,18 @@ export default function AdminCreationPage() {
               disabled={submitting}
               className="mt-5 w-full rounded-md bg-blue-700 px-4 py-2 text-sm font-semibold text-white hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {submitting ? 'Creating...' : 'Create admin'}
+              {submitting ? (editingAdminId ? 'Saving...' : 'Creating...') : (editingAdminId ? 'Save changes' : 'Create admin')}
             </button>
+            {editingAdminId && (
+              <button
+                type="button"
+                onClick={() => { setEditingAdminId(null); setForm(initialForm); }}
+                disabled={submitting}
+                className="mt-2 flex w-full items-center justify-center gap-2 rounded-md border border-slate-300 bg-white px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60"
+              >
+                <X className="h-4 w-4" /> Cancel editing
+              </button>
+            )}
           </form>
 
           <div className="rounded-lg border border-slate-200 bg-white shadow-sm">
@@ -310,9 +362,17 @@ export default function AdminCreationPage() {
                         </span>
                       </div>
                     </div>
-                    <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${admin.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
-                      {admin.is_active ? 'Active' : 'Inactive'}
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <span className={`w-fit rounded-full px-3 py-1 text-xs font-semibold ${admin.is_active ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-600'}`}>
+                        {admin.is_active ? 'Active' : 'Inactive'}
+                      </span>
+                      <button type="button" onClick={() => handleEdit(admin)} className="rounded-md p-2 text-blue-700 hover:bg-blue-50" title={`Edit ${admin.full_name || admin.username}`} aria-label={`Edit ${admin.full_name || admin.username}`}>
+                        <Pencil className="h-4 w-4" />
+                      </button>
+                      <button type="button" onClick={() => handleDelete(admin)} disabled={deletingAdminId === admin.id} className="rounded-md p-2 text-red-600 hover:bg-red-50 disabled:opacity-50" title={`Delete ${admin.full_name || admin.username}`} aria-label={`Delete ${admin.full_name || admin.username}`}>
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
                   </div>
                 ))}
               </div>

@@ -364,6 +364,15 @@ export const adminApi = {
       school_id: number;
       is_active?: boolean;
     }) => apiClient.post('setup/admin-users/', data),
+    update: (id: number, data: {
+      admin_name: string;
+      admin_phone?: string;
+      admin_email: string;
+      admin_password?: string;
+      school_id: number | null;
+      is_active: boolean;
+    }) => apiClient.patch(`setup/admin-users/${id}/`, data),
+    delete: (id: number) => apiClient.delete(`setup/admin-users/${id}/`),
   },
   fee: {
     overviewChart: (params?: URLSearchParams) =>

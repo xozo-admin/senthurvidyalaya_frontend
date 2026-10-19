@@ -812,6 +812,8 @@ export const adminApi = {
       apiClient.get(`schooladmin/staff/${staffId}/`, { params }),
     create: (data: any) => apiClient.post('schooladmin/staff/', data),
     update: (staffId: string, data: any) => apiClient.put(`schooladmin/staff/${staffId}/`, data),
+    resetLogin: (staffId: string, params?: { school_id?: number }) =>
+      apiClient.post(`schooladmin/staff/${encodeURIComponent(staffId)}/reset-login/`, undefined, { params }),
     delete: (staffId: string, params?: { school_id?: number }) =>
       apiClient.delete(`schooladmin/staff/${staffId}/`, { params }),
     overview: (staffId: string, params?: { school_id?: number }) =>

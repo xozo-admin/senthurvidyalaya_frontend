@@ -112,6 +112,7 @@ export default function AllStaffPage() {
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(
     null,
   );
+  const [resettingStaffId, setResettingStaffId] = useState<number | null>(null);
   const [selectedStaffIds, setSelectedStaffIds] = useState<number[]>([]);
   const schoolScope = useSchoolScope({ storageKey: "allstaff_school_scope" });
 
@@ -137,6 +138,25 @@ export default function AllStaffPage() {
   });
   const [formErrors, setFormErrors] = useState<Record<string, string>>({});
   const requiredStaffFields = ["staff_id", "name", "role", "phone"];
+
+  const resetStaffLogin = async (member: Staff) => {
+    const confirmed = window.confirm(
+      `Reset ${member.name}'s login password to the phone number shown in this staff record?`,
+    );
+    if (!confirmed) return;
+
+    setResettingStaffId(member.id);
+    try {
+      await adminApi.staff.resetLogin(member.staff_id, schoolScope.scopeParams);
+      toastSuccess("Staff login reset. Use the phone number in the staff record as the password.");
+    } catch (error: any) {
+      toastError(
+        error?.response?.data?.error || "Failed to reset this staff login.",
+      );
+    } finally {
+      setResettingStaffId(null);
+    }
+  };
 
   const normalizeStaffType = (value: string) =>
     value?.toString().trim().toLowerCase().replace(/\s+/g, "_");
@@ -2161,6 +2181,17 @@ export default function AllStaffPage() {
                                       title="View Salary Report"
                                     >
                                       <FaMoneyBillWave className="text-sm" />
+                                    </button>
+                                    <button
+                                      onClick={() => resetStaffLogin(member)}
+                                      disabled={resettingStaffId === member.id}
+                                      className={combine(
+                                        "p-1.5 rounded-lg transition-all duration-200 hover:text-[var(--color-accent-warning)] disabled:opacity-50",
+                                        get("icon", "primary") + " text-sm",
+                                      )}
+                                      title="Reset login password to staff phone"
+                                    >
+                                      <FaKey className="text-sm" />
                                     </button>
                                     <button
                                       onClick={() => startEdit(member)}

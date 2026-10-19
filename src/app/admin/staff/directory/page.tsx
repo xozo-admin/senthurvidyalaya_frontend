@@ -489,7 +489,7 @@ export default function AllStaffPage() {
         ...payload,
         ...schoolScope.scopeParams,
       });
-      toastSuccess("Staff member created successfully");
+      toastSuccess("Staff login created: use the Staff ID as username and the phone entered here as the initial password.");
       setMode("list");
       resetForm();
       fetchStaff(currentPage);

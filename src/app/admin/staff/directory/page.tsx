@@ -105,8 +105,9 @@ export default function AllStaffPage() {
   const [totalStaffCount, setTotalStaffCount] = useState(0);
   const [bulkUploadMode, setBulkUploadMode] = useState(false);
   const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [bulkUploadState, setBulkUploadState] = useState<"idle" | "validating" | "uploading">("idle");
+  const [bulkUploadErrors, setBulkUploadErrors] = useState<string[]>([]);
   const [imagesZipFile, setImagesZipFile] = useState<File | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [roleStats, setRoleStats] = useState<Record<string, number>>({});
   const [selectedStaff, setSelectedStaff] = useState<Staff | null>(null);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<number | null>(
@@ -838,19 +839,37 @@ export default function AllStaffPage() {
       return;
     }
 
-    setUploadProgress(0);
+    setBulkUploadErrors([]);
+    setBulkUploadState("validating");
     try {
+      // Validation uses the same server-side import path, but rolls back all
+      // database changes before returning its row-by-row report.
+      await adminApi.csv.uploadStudents(csvFile, {
+        ...schoolScope.scopeParams,
+        validate_only: true,
+      });
+
+      setBulkUploadState("uploading");
       await adminApi.csv.uploadStudents(csvFile, schoolScope.scopeParams);
       toastSuccess("Bulk upload completed successfully!");
       fetchStaff(currentPage);
       fetchStaffStats();
       setBulkUploadMode(false);
       setCsvFile(null);
-    } catch (error) {
+    } catch (error: any) {
       console.error("Upload error:", error);
-      toastError("Upload failed. Please try again.");
+      const responseData = error?.response?.data;
+      const rowErrors = Array.isArray(responseData?.errors)
+        ? responseData.errors.map((item: unknown) => String(item))
+        : [];
+      if (rowErrors.length > 0) {
+        setBulkUploadErrors(rowErrors);
+        toastWarning("Please correct the CSV issues below. No rows were uploaded.");
+      } else {
+        toastError(responseData?.error || responseData?.message || "Upload failed. Please try again.");
+      }
     } finally {
-      setUploadProgress(100);
+      setBulkUploadState("idle");
     }
   };
 
@@ -1187,9 +1206,11 @@ export default function AllStaffPage() {
                       <input
                         type="file"
                         accept=".csv"
-                        onChange={(e) =>
-                          setCsvFile(e.target.files?.[0] || null)
-                        }
+                        disabled={bulkUploadState !== "idle"}
+                        onChange={(e) => {
+                          setCsvFile(e.target.files?.[0] || null);
+                          setBulkUploadErrors([]);
+                        }}
                         className={getInputClass()}
                       />
                       <button
@@ -1207,7 +1228,7 @@ export default function AllStaffPage() {
                       </button>
                       <button
                         onClick={handleBulkUpload}
-                        disabled={!csvFile}
+                        disabled={!csvFile || bulkUploadState !== "idle"}
                         className={combine(
                           "px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-200 flex items-center justify-center space-x-1 sm:space-x-2 text-xs sm:text-sm",
                           theme === "dark"
@@ -1216,8 +1237,21 @@ export default function AllStaffPage() {
                           "disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]",
                         )}
                       >
-                        <FaDownload className="text-xs sm:text-sm" />
-                        <span className="text-xs sm:text-sm">Upload</span>
+                        {bulkUploadState === "idle" ? (
+                          <FaDownload className="text-xs sm:text-sm" />
+                        ) : (
+                          <span
+                            aria-hidden="true"
+                            className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+                          />
+                        )}
+                        <span className="text-xs sm:text-sm">
+                          {bulkUploadState === "validating"
+                            ? "Checking rows..."
+                            : bulkUploadState === "uploading"
+                              ? "Uploading..."
+                              : "Validate & Upload"}
+                        </span>
                       </button>
                     </div>
                     {csvFile && (
@@ -1232,6 +1266,21 @@ export default function AllStaffPage() {
                         Selected:{" "}
                         <span className="truncate">{csvFile.name}</span>
                       </p>
+                    )}
+                    {bulkUploadErrors.length > 0 && (
+                      <div
+                        role="alert"
+                        className="mt-3 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800"
+                      >
+                        <p className="font-semibold">
+                          {bulkUploadErrors.length} issue(s) found. Nothing was uploaded. Fix these rows and select the corrected CSV:
+                        </p>
+                        <ol className="mt-2 max-h-56 list-decimal space-y-1 overflow-y-auto pl-5">
+                          {bulkUploadErrors.map((issue, index) => (
+                            <li key={`${index}-${issue}`}>{issue}</li>
+                          ))}
+                        </ol>
+                      </div>
                     )}
                   </div>
 
@@ -1298,36 +1347,6 @@ export default function AllStaffPage() {
                       STF001.jpg, STF002.png).
                     </p>
                   </div>
-
-                  {uploadProgress > 0 && uploadProgress < 100 && (
-                    <div className="mb-3 sm:mb-4">
-                      <div
-                        className={combine(
-                          "flex justify-between text-xs mb-0.5 sm:mb-1",
-                          get("text", "secondary"),
-                        )}
-                      >
-                        <span>Uploading...</span>
-                        <span>{uploadProgress}%</span>
-                      </div>
-                      <div
-                        className={combine(
-                          "w-full rounded-full h-1 sm:h-1.5",
-                          get("bg", "secondary"),
-                        )}
-                      >
-                        <div
-                          className={combine(
-                            "h-1 sm:h-1.5 rounded-full transition-all duration-300",
-                            theme === "dark"
-                              ? "bg-gradient-to-r from-emerald-500 to-emerald-600"
-                              : "bg-gradient-to-r from-emerald-400 to-emerald-600",
-                          )}
-                          style={{ width: `${uploadProgress}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  )}
 
                   <div className={combine("text-xs", get("text", "secondary"))}>
                     <p

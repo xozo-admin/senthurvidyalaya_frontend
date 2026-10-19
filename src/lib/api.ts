@@ -1491,7 +1491,7 @@ export const adminApi = {
   },
 
   csv: {
-    uploadStudents: (file: File, params?: { school_id?: number }) => {
+    uploadStudents: (file: File, params?: { school_id?: number; validate_only?: boolean }) => {
       const formData = new FormData();
       formData.append('file', file);
       return apiClient.post('schooladmin/csv/', formData, { params });

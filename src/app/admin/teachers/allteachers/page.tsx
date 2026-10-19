@@ -1406,7 +1406,7 @@ export default function AllTeachersPage() {
                             get("text", "secondary"),
                           )}
                         >
-                          Upload a CSV file to add multiple teachers at once
+                          Upload a CSV file to add multiple teachers at once. Ten-digit mobile numbers get +91 automatically; existing country codes are kept.
                         </p>
                       </div>
                     </div>

@@ -269,7 +269,7 @@ export const AllStaffPage = () => {
       staff_id: formData.staff_id,
       name: formData.name,
       role: formData.role,
-      phone: formData.phone,
+      phone: formData.phone.replace(/\s+/g, ''),
       email: formData.email || null,
       address: formData.address || null,
       extra_details: {
@@ -341,7 +341,7 @@ export const AllStaffPage = () => {
       staff_id: formData.staff_id,
       name: formData.name,
       role: formData.role,
-      phone: formData.phone,
+      phone: formData.phone.replace(/\s+/g, ''),
       email: formData.email || null,
       address: formData.address || null,
       extra_details: {
@@ -1208,7 +1208,7 @@ export const AllStaffPage = () => {
                         <input
                           type="tel"
                           value={formData.phone}
-                          onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                          onChange={(e) => setFormData({...formData, phone: e.target.value.replace(/\s+/g, '')})}
                           required
                           className={getInputClass()}
                           placeholder="9876543210"

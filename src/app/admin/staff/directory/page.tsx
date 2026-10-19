@@ -454,7 +454,7 @@ export default function AllStaffPage() {
       staff_id: formData.staff_id.trim(),
       name: formData.name.trim(),
       role: formData.role,
-      phone: formData.phone.trim(),
+      phone: formData.phone.replace(/\s+/g, ""),
       extra_details: {
         ...(formData.date_of_birth && {
           date_of_birth: formData.date_of_birth,
@@ -535,7 +535,7 @@ export default function AllStaffPage() {
       staff_id: formData.staff_id.trim(),
       name: formData.name.trim(),
       role: formData.role,
-      phone: formData.phone.trim(),
+      phone: formData.phone.replace(/\s+/g, ""),
       extra_details: {
         ...(selectedStaff.extra_details || {}),
         ...(formData.date_of_birth && {
@@ -2859,7 +2859,7 @@ export default function AllStaffPage() {
                           type="tel"
                           value={formData.phone}
                           onChange={(e) =>
-                            updateFormField("phone", e.target.value)
+                            updateFormField("phone", e.target.value.replace(/\s+/g, ""))
                           }
                           className={getInputClass()}
                           placeholder="9876543210"

@@ -239,7 +239,11 @@ export const StaffManagementPage = () => {
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'role' ? value as StaffRole : value
+      [name]: name === 'role'
+        ? value as StaffRole
+        : name === 'phone'
+          ? value.replace(/\s+/g, '')
+          : value
     }));
   };
 
@@ -253,7 +257,7 @@ export const StaffManagementPage = () => {
     const payload = {
       staff_id: formData.staff_id,
       name: formData.name,
-      phone: formData.phone,
+      phone: formData.phone.replace(/\s+/g, ''),
       role: formData.role,
       email: formData.email || null,
       address: formData.address || null,

@@ -150,8 +150,13 @@ export default function AllStaffPage() {
       await adminApi.staff.resetLogin(member.staff_id, schoolScope.scopeParams);
       toastSuccess("Staff login reset. Use the phone number in the staff record as the password.");
     } catch (error: any) {
+      const status = error?.response?.status;
       toastError(
-        error?.response?.data?.error || "Failed to reset this staff login.",
+        error?.response?.data?.error ||
+          error?.response?.data?.detail ||
+          error?.response?.data?.message ||
+          (status ? `Staff login reset failed (HTTP ${status}).` : error?.message) ||
+          "Failed to reset this staff login.",
       );
     } finally {
       setResettingStaffId(null);

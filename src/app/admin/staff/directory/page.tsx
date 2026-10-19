@@ -148,7 +148,7 @@ export default function AllStaffPage() {
     setResettingStaffId(member.id);
     try {
       await adminApi.staff.resetLogin(member.staff_id, schoolScope.scopeParams);
-      toastSuccess("Staff login reset. Use the phone number in the staff record as the password.");
+      toastSuccess("Staff login reset. Use the registered phone number without spaces as the password.");
     } catch (error: any) {
       const status = error?.response?.status;
       toastError(
@@ -489,7 +489,7 @@ export default function AllStaffPage() {
         ...payload,
         ...schoolScope.scopeParams,
       });
-      toastSuccess("Staff login created: use the Staff ID as username and the phone entered here as the initial password.");
+      toastSuccess("Staff login created: use the Staff ID as username and the registered phone number without spaces as the initial password.");
       setMode("list");
       resetForm();
       fetchStaff(currentPage);

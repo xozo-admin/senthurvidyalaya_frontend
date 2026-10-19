@@ -290,7 +290,9 @@ export const StaffManagementPage = () => {
           address: '',
           extra_details: {}
         });
-        setSuccessMessage(`Staff ${mode === 'edit' ? 'updated' : 'added'} successfully!`);
+        setSuccessMessage(mode === 'edit'
+          ? 'Staff updated successfully!'
+          : 'Staff added. Login with the Staff ID and the registered phone number without spaces as the initial password.');
         setTimeout(() => setSuccessMessage(''), 3000);
       } else {
         const errorMsg = responseData.detail || 

@@ -88,16 +88,12 @@ export const LoginForm = ({ onSubmit }: LoginFormProps) => {
 
 
   const handleSuccessfulLogin = (data: any) => {
-    console.log('Login successful:', data);
-
     if (!data.token) {
       toastError('No token received');
       return;
     }
 
     toastSuccess(`Welcome back, ${data.user_type}!`);
-
-    console.log("Received session key:", data.session_key);
 
     const enrichedData = {
       ...data,
@@ -264,7 +260,6 @@ export const LoginForm = ({ onSubmit }: LoginFormProps) => {
 
     setIsLoading(true);
     setApiResponse(null);
-    console.log('🚀 Login attempt with:', { username, password });
 
     // OTP verification step
     if (loginStep === 'otp') {
@@ -276,11 +271,8 @@ export const LoginForm = ({ onSubmit }: LoginFormProps) => {
       }
 
       try {
-        console.log('🔐 Verifying OTP:', { username, otp });
-        const response = await api.auth.verifyOtp({ username, otp });
+        const response = await api.auth.verifyOtp({ username: username.trim(), otp: otp.trim() });
         const data = response.data;
-
-        console.log('✅ OTP verification response:', data);
 
         const otpVerified =
           !!data.token &&
@@ -328,18 +320,14 @@ export const LoginForm = ({ onSubmit }: LoginFormProps) => {
 
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) {
-      console.log('❌ Validation errors:', newErrors);
       setIsLoading(false);
 
       return;
     }
 
     try {
-      console.log('📡 Sending login request...');
-      const response = await api.auth.login({ username, password });
+      const response = await api.auth.login({ username: username.trim(), password });
       const data = response.data;
-
-      console.log('📥 Login API response:', data);
       setApiResponse(data);
 
       const isTwoFactorRequired = data.status === '2FA_REQUIRED';
@@ -349,12 +337,10 @@ export const LoginForm = ({ onSubmit }: LoginFormProps) => {
         !!data.user_type;
 
       if (isTwoFactorRequired) {
-        console.log('🔐 2FA required, switching to OTP step');
         toastInfo('OTP sent successfully. Please enter the 4-digit code.');
         startOtpFlow();
       } else if (isFinalizedLogin) {
         toastSuccess('Login successful!');
-        console.log('✅ Login successful, processing...');
         handleSuccessfulLogin(data);
       } else {
         const errorMessage = data.error || data.message || 'Login failed';
@@ -369,7 +355,7 @@ export const LoginForm = ({ onSubmit }: LoginFormProps) => {
         'Something went wrong. Please try again.';
 
       toastError(errorMessage);
-      console.error('❌ Login error:', error);
+        console.error('Login request failed:', error.response?.status || error.message);
     } finally {
       setIsLoading(false);
     }

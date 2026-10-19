@@ -264,8 +264,8 @@ export default function AllStudentsPage() {
   const [bulkUploadMode, setBulkUploadMode] = useState(false);
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [imagesZipFile, setImagesZipFile] = useState<File | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [uploadingStudents, setUploadingStudents] = useState(false);
+  const [studentUploadPhase, setStudentUploadPhase] = useState<"validating" | "uploading" | null>(null);
   const [uploadingImages, setUploadingImages] = useState(false);
   const [studentUploadResult, setStudentUploadResult] =
     useState<StudentUploadResult | null>(null);
@@ -994,12 +994,17 @@ export default function AllStudentsPage() {
       return;
     }
 
-    setUploadProgress(0);
     setUploadingStudents(true);
+    setStudentUploadPhase("validating");
     setStudentUploadResult(null);
 
     try {
-      setUploadProgress(35);
+      await adminApi.csv.uploadStudents(csvFile, {
+        ...schoolScope.scopeParams,
+        validate_only: true,
+      });
+
+      setStudentUploadPhase("uploading");
       const response = await adminApi.csv.uploadStudents(csvFile, schoolScope.scopeParams);
       const result = normalizeStudentUploadResult(response?.data);
       setStudentUploadResult(result);
@@ -1027,14 +1032,17 @@ export default function AllStudentsPage() {
       setCsvFile(null);
     } catch (error: any) {
       console.error("Upload error:", error);
-      const message = getApiErrorMessage(error, "Upload failed. Please try again.");
       const result = error?.response?.data
         ? normalizeStudentUploadResult(error.response.data)
         : null;
       setStudentUploadResult(result);
-      toastError(message);
+      if (result?.errors.length) {
+        toastWarning("Please correct the CSV issues below. No rows were uploaded.");
+      } else {
+        toastError(getApiErrorMessage(error, "Upload failed. Please try again."));
+      }
     } finally {
-      setUploadProgress(100);
+      setStudentUploadPhase(null);
       setUploadingStudents(false);
     }
   };
@@ -1680,6 +1688,7 @@ export default function AllStudentsPage() {
                     <input
                       type="file"
                       accept=".csv"
+                      disabled={uploadingStudents}
                       onChange={(e) => {
                         setCsvFile(e.target.files?.[0] || null);
                         setStudentUploadResult(null);
@@ -1710,9 +1719,20 @@ export default function AllStudentsPage() {
                         "disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]",
                       )}
                     >
-                      <FiDownload className="text-xs sm:text-sm" />
+                      {uploadingStudents ? (
+                        <span
+                          aria-hidden="true"
+                          className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+                        />
+                      ) : (
+                        <FiDownload className="text-xs sm:text-sm" />
+                      )}
                       <span className="text-xs sm:text-sm">
-                        {uploadingStudents ? "Uploading..." : "Upload"}
+                        {studentUploadPhase === "validating"
+                          ? "Checking rows..."
+                          : studentUploadPhase === "uploading"
+                            ? "Uploading..."
+                            : "Validate & Upload"}
                       </span>
                     </button>
                   </div>
@@ -1796,36 +1816,6 @@ export default function AllStudentsPage() {
                   </p>
                 </div>
 
-                {uploadProgress > 0 && uploadProgress < 100 && (
-                  <div className="mb-3 sm:mb-4">
-                    <div
-                      className={combine(
-                        "flex justify-between text-xs mb-0.5 sm:mb-1",
-                        get("text", "secondary"),
-                      )}
-                    >
-                      <span>Uploading...</span>
-                      <span>{uploadProgress}%</span>
-                    </div>
-                    <div
-                      className={combine(
-                        "w-full rounded-full h-1 sm:h-1.5",
-                        get("bg", "secondary"),
-                      )}
-                    >
-                      <div
-                        className={combine(
-                          "h-1 sm:h-1.5 rounded-full transition-all duration-300",
-                          theme === "dark"
-                            ? "bg-gradient-to-r from-emerald-500 to-emerald-600"
-                            : "bg-gradient-to-r from-emerald-400 to-emerald-600",
-                        )}
-                        style={{ width: `${uploadProgress}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                )}
-
                 {studentUploadResult && (
                   <div
                     className={combine(
@@ -1840,24 +1830,21 @@ export default function AllStudentsPage() {
                     )}
                   >
                     <p className="font-semibold">{studentUploadResult.message}</p>
-                    <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
-                      <span>Created: {studentUploadResult.summary.profiles_created}</span>
-                      <span>Updated: {studentUploadResult.summary.profiles_updated}</span>
-                      <span>Enrolled: {studentUploadResult.summary.enrolled_in_year}</span>
-                    </div>
+                    {studentUploadResult.errors.length === 0 && (
+                      <div className="mt-2 grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <span>Created: {studentUploadResult.summary.profiles_created}</span>
+                        <span>Updated: {studentUploadResult.summary.profiles_updated}</span>
+                        <span>Enrolled: {studentUploadResult.summary.enrolled_in_year}</span>
+                      </div>
+                    )}
                     {studentUploadResult.errors.length > 0 && (
-                      <div className="mt-2">
-                        <p className="font-medium">Row issues:</p>
-                        <ul className="mt-1 max-h-28 overflow-y-auto space-y-1">
-                          {studentUploadResult.errors.slice(0, 8).map((error, index) => (
+                      <div role="alert" className="mt-2">
+                        <p className="font-medium">No rows were uploaded. Fix these row issues and select the corrected CSV:</p>
+                        <ul className="mt-1 max-h-56 overflow-y-auto space-y-1">
+                          {studentUploadResult.errors.map((error, index) => (
                             <li key={`${error}-${index}`}>{error}</li>
                           ))}
                         </ul>
-                        {studentUploadResult.errors.length > 8 && (
-                          <p className="mt-1">
-                            +{studentUploadResult.errors.length - 8} more issue(s)
-                          </p>
-                        )}
                       </div>
                     )}
                   </div>

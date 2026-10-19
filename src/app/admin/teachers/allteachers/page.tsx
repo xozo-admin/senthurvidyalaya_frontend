@@ -109,8 +109,9 @@ export default function AllTeachersPage() {
   const [isMobile, setIsMobile] = useState(false);
   const [bulkUploadMode, setBulkUploadMode] = useState(false);
   const [csvFile, setCsvFile] = useState<File | null>(null);
+  const [csvUploadState, setCsvUploadState] = useState<"idle" | "validating" | "uploading">("idle");
+  const [csvUploadErrors, setCsvUploadErrors] = useState<string[]>([]);
   const [imagesZipFile, setImagesZipFile] = useState<File | null>(null);
-  const [uploadProgress, setUploadProgress] = useState(0);
   const [fullStats, setFullStats] = useState({
     deptCount: 0,
     assignedCount: 0,
@@ -930,24 +931,18 @@ export default function AllTeachersPage() {
       return;
     }
 
-    setUploadProgress(0);
+    setCsvUploadErrors([]);
+    setCsvUploadState("validating");
     try {
-      const response = await adminApi.csv.uploadStudents(
-        csvFile,
-        schoolScope.scopeParams,
-      );
+      await adminApi.csv.uploadStudents(csvFile, {
+        ...schoolScope.scopeParams,
+        validate_only: true,
+      });
+
+      setCsvUploadState("uploading");
+      const response = await adminApi.csv.uploadStudents(csvFile, schoolScope.scopeParams);
       const result = response?.data || {};
-      const errors: string[] = Array.isArray(result.errors) ? result.errors : [];
-      if (errors.length > 0) {
-        console.warn("Teacher CSV upload row errors:", errors);
-        toastWarning(
-          `${result.summary?.teachers || 0} teachers uploaded; ${errors.length} row(s) failed. ${errors[0]}`,
-        );
-      } else {
-        toastSuccess(
-          `Bulk upload completed successfully (${result.summary?.teachers || 0} teachers).`,
-        );
-      }
+      toastSuccess(`Bulk upload completed successfully (${result.summary?.teachers || 0} teachers).`);
       fetchTeachers(currentPage);
       fetchTeacherStats();
       setBulkUploadMode(false);
@@ -955,14 +950,17 @@ export default function AllTeachersPage() {
     } catch (error: any) {
       console.error("Upload error:", error);
       const responseData = error?.response?.data || {};
-      const firstRowError = Array.isArray(responseData.errors)
-        ? responseData.errors[0]
-        : null;
-      toastError(
-        firstRowError || responseData.error || responseData.message || "Upload failed. Please try again.",
-      );
+      const rowErrors = Array.isArray(responseData.errors)
+        ? responseData.errors.map((item: unknown) => String(item))
+        : [];
+      if (rowErrors.length > 0) {
+        setCsvUploadErrors(rowErrors);
+        toastWarning("Please correct the CSV issues below. No rows were uploaded.");
+      } else {
+        toastError(responseData.error || responseData.message || "Upload failed. Please try again.");
+      }
     } finally {
-      setUploadProgress(100);
+      setCsvUploadState("idle");
     }
   };
 
@@ -1440,9 +1438,11 @@ export default function AllTeachersPage() {
                       <input
                         type="file"
                         accept=".csv"
-                        onChange={(e) =>
-                          setCsvFile(e.target.files?.[0] || null)
-                        }
+                        disabled={csvUploadState !== "idle"}
+                        onChange={(e) => {
+                          setCsvFile(e.target.files?.[0] || null);
+                          setCsvUploadErrors([]);
+                        }}
                         className={getInputClass()}
                       />
                       <button
@@ -1460,7 +1460,7 @@ export default function AllTeachersPage() {
                       </button>
                       <button
                         onClick={handleBulkUpload}
-                        disabled={!csvFile}
+                        disabled={!csvFile || csvUploadState !== "idle"}
                         className={combine(
                           "px-3 sm:px-4 py-2 sm:py-2.5 rounded-lg sm:rounded-xl transition-all duration-200 flex items-center justify-center space-x-1 sm:space-x-2 text-xs sm:text-sm",
                           theme === "dark"
@@ -1469,8 +1469,21 @@ export default function AllTeachersPage() {
                           "disabled:opacity-50 disabled:cursor-not-allowed hover:scale-[1.02] active:scale-[0.98]",
                         )}
                       >
-                        <FaDownload className="text-xs sm:text-sm" />
-                        <span className="text-xs sm:text-sm">Upload</span>
+                        {csvUploadState === "idle" ? (
+                          <FaDownload className="text-xs sm:text-sm" />
+                        ) : (
+                          <span
+                            aria-hidden="true"
+                            className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"
+                          />
+                        )}
+                        <span className="text-xs sm:text-sm">
+                          {csvUploadState === "validating"
+                            ? "Checking rows..."
+                            : csvUploadState === "uploading"
+                              ? "Uploading..."
+                              : "Validate & Upload"}
+                        </span>
                       </button>
                     </div>
                     {csvFile && (
@@ -1485,6 +1498,21 @@ export default function AllTeachersPage() {
                         Selected:{" "}
                         <span className="truncate">{csvFile.name}</span>
                       </p>
+                    )}
+                    {csvUploadErrors.length > 0 && (
+                      <div
+                        role="alert"
+                        className="mt-3 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800"
+                      >
+                        <p className="font-semibold">
+                          {csvUploadErrors.length} issue(s) found. Nothing was uploaded. Fix these rows and select the corrected CSV:
+                        </p>
+                        <ol className="mt-2 max-h-56 list-decimal space-y-1 overflow-y-auto pl-5">
+                          {csvUploadErrors.map((issue, index) => (
+                            <li key={`${index}-${issue}`}>{issue}</li>
+                          ))}
+                        </ol>
+                      </div>
                     )}
                   </div>
 
@@ -1551,36 +1579,6 @@ export default function AllTeachersPage() {
                       TCH001.jpg, TCH002.png).
                     </p>
                   </div>
-
-                  {uploadProgress > 0 && uploadProgress < 100 && (
-                    <div className="mb-3 sm:mb-4">
-                      <div
-                        className={combine(
-                          "flex justify-between text-xs mb-0.5 sm:mb-1",
-                          get("text", "secondary"),
-                        )}
-                      >
-                        <span>Uploading...</span>
-                        <span>{uploadProgress}%</span>
-                      </div>
-                      <div
-                        className={combine(
-                          "w-full rounded-full h-1 sm:h-1.5",
-                          get("bg", "secondary"),
-                        )}
-                      >
-                        <div
-                          className={combine(
-                            "h-1 sm:h-1.5 rounded-full transition-all duration-300",
-                            theme === "dark"
-                              ? "bg-gradient-to-r from-emerald-500 to-emerald-600"
-                              : "bg-gradient-to-r from-emerald-400 to-emerald-600",
-                          )}
-                          style={{ width: `${uploadProgress}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  )}
 
                   <div className={combine("text-xs", get("text", "secondary"))}>
                     <p
